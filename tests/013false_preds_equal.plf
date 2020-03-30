@@ -1,0 +1,7 @@
+(check 
+(% p1 (term Bool)
+  (% p2 (term Bool)
+    (% ph1 (th_holds (not (p_app p1)))
+      (% ph2 (th_holds (not (p_app p2)))
+          (: (th_holds (= _ p1 p2))
+            (false_preds_equal p1 p2 ph1 ph2)))))))

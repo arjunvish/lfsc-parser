@@ -1,0 +1,44 @@
+(check
+ ;; Declarations
+(% A sort
+(% x (term A)
+(% f (term (arrow A A))
+(% A1 (th_holds true)
+(% A0 (th_holds (not (impl (and (= A (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x)))) (apply _ _ f x)) (= A (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x)))))) (apply _ _ f x))) (= A (apply _ _ f (apply _ _ f x)) (apply _ _ f x)))))
+(: (holds cln)
+
+ ;; Printing deferred declarations 
+
+
+ ;; Printing the global let map ;; Printing aliasing declarations 
+
+
+ ;; Rewrites for Lemmas 
+
+ ;; In the preprocessor we trust 
+(th_let_pf _ (trust_f (not (impl (and (= A (apply _ _ f x) (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x))))) (= A (apply _ _ f x) (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x)))))))) (= A (apply _ _ f x) (apply _ _ f (apply _ _ f x)))))) (\ .PA284
+
+;; Printing mapping from preprocessed assertions into atoms 
+(decl_atom (= A (apply _ _ f x) (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x))))) (\ .v2 (\ .a2
+(decl_atom (= A (apply _ _ f x) (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f (apply _ _ f x))))))) (\ .v3 (\ .a3
+(decl_atom (= A (apply _ _ f x) (apply _ _ f (apply _ _ f x))) (\ .v4 (\ .a4
+(satlem _ _ (asf _ _ _ .a2 (\ .l4 (clausify_false (contra _ (and_elim_1 _ _ (and_elim_1 _ _ (not_impl_elim _ _ .PA284))) .l4)))) (\ .pb4
+(satlem _ _ (ast _ _ _ .a4 (\ .l9 (clausify_false (contra _ .l9 (and_elim_2 _ _ (not_impl_elim _ _ .PA284)))))) (\ .pb6
+(satlem _ _ (asf _ _ _ .a3 (\ .l6 (clausify_false (contra _ (and_elim_2 _ _ (and_elim_1 _ _ (not_impl_elim _ _ .PA284))) .l6)))) (\ .pb5
+ ;; Theory Lemmas 
+
+;; BB atom mapping
+
+
+;; Bit-blasting definitional clauses 
+
+
+ ;; Bit-blasting learned clauses 
+
+(satlem _ _ (asf _ _ _ .a4 (\ .l8 (ast _ _ _ .a3 (\ .l7 (ast _ _ _ .a2 (\ .l5  ;; UF Theory Lemma 
+;;(let ((_let_0 (f x))) (= _let_0 (f _let_0))) (let ((_let_0 (f x))) (not (= _let_0 (f (f (f (f (f _let_0)))))))) (let ((_let_0 (f x))) (not (= _let_0 (f (f (f _let_0)))))) 
+(clausify_false (contra _ (trans _ _ _ _ .l7 (trans _ _ _ _ (trans _ _ _ _ (symm _ _ _ .l7) .l5) (symm _ _ _ (cong _ _ _ _ _ _ (refl _ f) (trans _ _ _ _ .l7 (cong _ _ _ _ _ _ (refl _ f) (cong _ _ _ _ _ _ (refl _ f) (symm _ _ _ .l5)))))))) .l8))
+))))))( \ .lemc7
+;; Printing final unsat proof 
+(satlem_simplify _ _ _ (Q _ _ (Q _ _ (R _ _ .lemc7 .pb6 .v4) .pb5 .v3) .pb4 .v2) (\ empty empty))))))))))))))))))))))))))))
+;;

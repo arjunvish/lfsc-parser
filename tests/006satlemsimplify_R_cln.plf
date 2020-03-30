@@ -1,0 +1,7 @@
+(check
+  (% v1 var
+    (% p1 (holds (clc (pos v1) cln))
+    (% p2 (holds (clc (neg v1) cln))
+      (: (holds cln)
+          (satlem_simplify _ _ _ (R _ _ p1 p2 v1)
+            (\ p3 p3)))))))

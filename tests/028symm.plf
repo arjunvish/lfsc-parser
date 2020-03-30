@@ -1,0 +1,7 @@
+(check 
+  (% A sort
+  (% p (term A)
+  (% q (term A)
+  (% pf (th_holds (= _ p q))
+    (: (th_holds (= _ q p))
+         (symm _ _ _ pf)))))))

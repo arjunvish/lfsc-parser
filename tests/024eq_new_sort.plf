@@ -1,0 +1,7 @@
+(check 
+(% A sort
+(% a1 (term A)
+(% a2 (term A)
+(% pf (th_holds (= _ a1 a2))
+  (: (th_holds (= _ a1 a2))
+       pf))))))

@@ -1,0 +1,35 @@
+; This is based on a hand-written proof by Alex for ER.
+; The original proof is here: https://github.com/CVC4/CVC4/blob/923abd7000a2ab6e3c0776c59d159bdc3a4d9a52/proofs/signatures/er_test.plf#L28
+; to check, run (with full paths):
+; lfscc sat.plf bool_hand_written.plf
+(check
+  (% v1 var
+  (% v2 var
+    (% pf_c1 (holds (clc (pos v1) (clc (pos v2) cln)))  ; v1\/v2
+    (% pf_c2 (holds (clc (neg v1) (clc (pos v2) cln)))  ; ~v1\/v2
+    (% pf_c3 (holds (clc (pos v1) (clc (neg v2) cln)))  ; v1\/~v2
+    (% pf_c4 (holds (clc (neg v1) (clc (neg v2) cln)))  ; ~v1\/~v2
+       (: (holds cln)
+            (satlem_simplify _ _ _ (R _ _ pf_c1 pf_c2 v1)  
+              (\ pf_c8 
+                (satlem_simplify _ _ _ (Q _ _ pf_c4 pf_c8 v2)  ; v2 (using resolution on v1\/v2 and ~v1\/v2
+                  (\ pf_c11 
+                    (satlem_simplify _ _ _ (Q _ _ pf_c11 pf_c3 v1); ~v1 (using resolution on v2 and ~v1\/~v2)
+                      (\ pf_c12 
+                        (satlem_simplify _ _ _ (Q _ _ pf_c12 pf_c8 v2); ~v2 (using resolution on ~v1 and v1\/~v2)  
+                          (\ pf_c13 pf_c13) ; empty (using resolution on v2 and ~v2)
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+        )
+    )
+    )
+    )
+    )
+  )
+  )
+)

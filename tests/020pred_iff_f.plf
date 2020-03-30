@@ -1,0 +1,5 @@
+(check 
+(% p (term Bool)
+  (% ph (th_holds (iff false (p_app p)))
+    (: (th_holds (= _ t_false p))
+      (pred_iff_f p ph)))))
