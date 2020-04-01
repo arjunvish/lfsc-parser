@@ -4,12 +4,6 @@
 open Lexing
 open Format
 
-(* A hashtable that maps LFSC variable names to integers *)
-let var_map = Hashtbl.create 10
-
-(* The integer corresponding to every new LFSC variable,
-   starts from 1 and increases by 1 *)
-let ctr = ref 1
 let concat_sp_sep_2 a b = "("^a^" "^b^")"
 let concat_sp_sep_3 a b c = "("^a^" "^b^" "^c^")"
 let concat_sp_sep_4 a b c d = "("^a^" "^b^" "^c^" "^d^")"
@@ -17,25 +11,10 @@ let concat_sp_sep_5 a b c d e = "("^a^" "^b^" "^c^" "^d^" "^e^")"
 let concat_sp_sep_6 a b c d e f = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^")"
 let concat_sp_sep_7 a b c d e f g = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^")"
 let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^" "^h^")"
-
-let dedollarify s = 
-  if (String.contains s '$') then
-    let s_list = (String.split_on_char '$' s) in
-      (String.concat "" s_list)
-  else s
-
-let deperiodify s =
-  if (String.contains s '.') then
-    let s_list = (String.split_on_char '.' s) in
-      (String.concat "" s_list)
-  else s
-
-let convert_id s = 
-  let s = dedollarify s in
-  deperiodify s
 %}
 
 %token <string> IDENT
+%token <string> ANYTHING
 %token <int> INT
 %token LPAREN RPAREN EOF HASH_SEMI
 %token LAMBDA PI BIGLAMBDA COLON
@@ -75,14 +54,13 @@ let convert_id s =
 
 %start command
 %type <unit> command
-
 %%
 
 lit:
   | LPAREN POS IDENT RPAREN
-    { concat_sp_sep_2 "lit.pos" (convert_id $3) }
+    { concat_sp_sep_2 "lit.pos" ($3) }
   | LPAREN NEG IDENT RPAREN
-    { concat_sp_sep_2 "lit.neg" (convert_id $3) }
+    { concat_sp_sep_2 "lit.neg" ($3) }
 ;
 
 clause:
@@ -103,49 +81,56 @@ cnf:
   | HOLE { "" }
 ;
 
-sort:
+arrow_sort:
   | BOOL { "Bool" }
-  | LPAREN ARROW sort sort RPAREN { concat_sp_sep_3 "arrow" $3 $4 }
-  | IDENT { (convert_id $1) }
-  | HOLE { "" }
+  | LPAREN ARROW arrow_sort arrow_sort RPAREN
+    { ("("^$3^")"^" "^$4^")") }
+;
+
+sort:
+  | LPAREN ARROW arrow_sort arrow_sort RPAREN 
+    { ("("^$3^")"^" "^$4^")") }
+  | IDENT { "IFUCKEDUP!-sort->IDENT" }
+  | HOLE { "IFUCKEDUP!-sort->HOLE" }
 ;
 
 sorted_term:
   | LPAREN ITE sort formula sorted_term sorted_term RPAREN
     { concat_sp_sep_5 "ite" $3 $4 $5 $6 }
-  | T_TRUE { "t_true" }
-  | T_FALSE { "t_false" }
+  | T_TRUE { "true" }
+  | T_FALSE { "false" }
   | LPAREN F_TO_B formula RPAREN
-    { concat_sp_sep_2 "f_to_b" $3 }
+    { $3 }
   | LPAREN APPLY sort sort sorted_term sorted_term RPAREN
-    { concat_sp_sep_3 "apply" $5 $6 }
-  | IDENT { (convert_id $1) }
+    { concat_sp_sep_2 $5 $6 }
+  | IDENT { ($1) }
   | HOLE { "" }
 ;
 
 formula:
   | TRUE { "true" }
   | FALSE { "false" }
-  | LPAREN NOT formula RPAREN { concat_sp_sep_2 "not" $3 }
+  | LPAREN NOT formula RPAREN 
+    { (concat_sp_sep_2 "not" $3) }
   | LPAREN AND formula formula RPAREN
-    { concat_sp_sep_3 "and" $3 $4 }
+    { (concat_sp_sep_3 "and" $3 $4) }
   | LPAREN OR formula formula RPAREN
-    { concat_sp_sep_3 "or" $3 $4 }
+    { (concat_sp_sep_3 "or" $3 $4) }
   | LPAREN IMPL formula formula RPAREN
-    { concat_sp_sep_3 "impl" $3 $4 }
+    { (concat_sp_sep_3 "=>" $3 $4) }
   | LPAREN IFF formula formula RPAREN
-    { concat_sp_sep_3 "iff" $3 $4 }
+    { (concat_sp_sep_3 "=" $3 $4) }
   | LPAREN XOR formula formula RPAREN
-    { concat_sp_sep_3 "xor" $3 $4 }
+    { (concat_sp_sep_3 "xor" $3 $4) }
   | LPAREN IFTE formula formula formula RPAREN
-    { concat_sp_sep_4 "ifte" $3 $4 $5 }
+    { (concat_sp_sep_4 "ite" $3 $4 $5) }
   | LPAREN EQUALS sort sorted_term sorted_term RPAREN
-    { concat_sp_sep_3 "eq" $4 $5 }
+    { "IFUCKEDUP!" }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
-    { "(let' "^$2^" "^$3^" (fun "^(convert_id $6)^",\n   "^$7^")" }
+    { "IFUCKEDUP!" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
-    { "(flet "^$2^" (fun "^(convert_id $5)^",\n   "^$6^")" }
-  | LPAREN P_APP sorted_term RPAREN { concat_sp_sep_2 "p_app" $3 }
+    { "IFUCKEDUP!" }
+  | LPAREN P_APP sorted_term RPAREN { $3 }
   | HOLE { "" }
 ;
 
@@ -155,8 +140,8 @@ holds_term:
   | LPAREN CNF_HOLDS cnf RPAREN
     { ("cnf_holds ("^$3^")") }
   | LPAREN TH_HOLDS formula RPAREN
-    { ("th_holds "^$3) }
-  | IDENT { (convert_id $1) }
+    { ($3) }
+  | IDENT { $1 }
 ;
 
 proof_term:
@@ -165,10 +150,10 @@ proof_term:
   | LPAREN SATLEM_SIMPLIFY clause clause clause proof_term proof_term RPAREN
     { "(satlem_simplify "^$3^$4^$5^$6^" \n"^" _ "^$7^")" }
   | LPAREN RRES clause clause proof_term proof_term IDENT RPAREN
-    { "(R "^$3^$4^$5^" "^$6^" "^(convert_id $7)^")" }
+    { "(R "^$3^$4^$5^" "^$6^" "^$7^")" }
   | LPAREN QRES clause clause proof_term proof_term IDENT RPAREN
-    { "(Q "^$3^$4^$5^" "^$6^" "^(convert_id $7)^")" }
-  | LPAREN LAMBDA IDENT proof_term RPAREN { "(fun "^(convert_id $3)^",\n   "^$4^")" }
+    { "(Q "^$3^$4^$5^" "^$6^" "^$7^")" }
+  | LPAREN LAMBDA IDENT proof_term RPAREN { "(fun "^$3^",\n   "^$4^")" }
   | CNFN_PROOF { "cnfn_proof" }
   | LPAREN CNFC_PROOF clause clause cnf proof_term proof_term RPAREN
     { "(cnfc_proof \n"^$3^$4^$5^" "^$6^" "^$7^")" }
@@ -290,46 +275,42 @@ proof_term:
   | LPAREN CONG sort sort sorted_term sorted_term sorted_term sorted_term proof_term proof_term RPAREN
     { concat_sp_sep_3 "cong" $9 $10 }
   | HOLE { "" }
-  | IDENT { (" "^(convert_id $1)^" ") }
-;
-
-var:
-  | IDENT VAR
-  {
-    let s = string_of_int (!ctr) in
-    (* if variable already exists in map, replace its
-       associated integer with the latest integer; otherwise,
-       add it and associate it with the latest integer *)
-    let _ = (match (Hashtbl.find var_map $1) with
-      | i -> (Hashtbl.replace var_map $1 !ctr)
-      | exception Not_found -> (Hashtbl.add var_map $1 !ctr)) in
-    ctr := !ctr + 1;
-    ("let "^(convert_id $1)^" := "^s^" in ")
-  }
-;
-
-lfsc_type:
-  | holds_term { $1 }
-  | LPAREN TERM sort RPAREN { "term "^$3 }
-  | SORT { "sort" }
+  | IDENT { (" "^$1^" ") }
 ;
 
 typed_var:
-  | var { $1 }
-  | IDENT lfsc_type
-  { ("fun ("^(convert_id $1)^" : "^$2^"), ") }
+  | IDENT VAR { "IFUCKEDUP!-typed_var->IDENT VAR" }
+  | IDENT LPAREN TERM BOOL RPAREN
+    { ("(declare-fun "^$1^" () Bool)") }
+  | IDENT LPAREN TERM sort RPAREN 
+    { ("(declare-fun "^$1^" "^$4^")") }
+  | IDENT SORT { ($1^" : sort") }
+  | IDENT holds_term 
+    { ("(assert "^$2^")")}
+;
+/*
+holds_anything_term:
+  | LPAREN ANYTHING RPAREN
+    { "" }
 ;
 
+proof_anything_term:
+  | LPAREN ANYTHING RPAREN
+    { "" }
+;
+*/
 term:
   | LPAREN COLON holds_term proof_term RPAREN
-    { "("^$4^" : "^$3^")" }
+    { "" }
   | LPAREN BIGLAMBDA typed_var term RPAREN
     { $3^"\n"^$4 }
 ;
 
 check_command:
   | LPAREN CHECK term RPAREN
-    { print_string ("#check\n("^$3^")\n") }
+    { print_string 
+      ("(set-logic ALL_SUPPORTED)\n"
+        ^$3^"(check-sat)\n") }
 ;
 
 command:

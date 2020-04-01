@@ -85,6 +85,7 @@
       val at : t
       val integer : string -> t
       val ident : string -> t
+      val anything : string -> t
       val eof : t
       val simple_string : string -> t
       val hash_semi : t
@@ -218,6 +219,7 @@
 
 }
 
+let anything = _*
 let lf = '\010'
 let lf_cr = ['\010' '\013']
 let dos_newline = "\013\010"
@@ -540,6 +542,7 @@ and scan_block_comment buf locs = parse
         let simple_string x =
           try Hashtbl.find keywords x with Not_found -> IDENT x
         let quoted_string _ buf = IDENT (Buffer.contents buf)
+        let anything i = ANYTHING i
         let var = VAR
         let holds = HOLDS
         let clc = CLC
