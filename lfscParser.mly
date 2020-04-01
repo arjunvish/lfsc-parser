@@ -96,7 +96,7 @@ sort:
 
 sorted_term:
   | LPAREN ITE sort formula sorted_term sorted_term RPAREN
-    { concat_sp_sep_5 "ite" $3 $4 $5 $6 }
+    { concat_sp_sep_4 "ite" $4 $5 $6 }
   | T_TRUE { "true" }
   | T_FALSE { "false" }
   | LPAREN F_TO_B formula RPAREN
@@ -104,7 +104,8 @@ sorted_term:
   | LPAREN APPLY sort sort sorted_term sorted_term RPAREN
     { concat_sp_sep_2 $5 $6 }
   | IDENT { ($1) }
-  | HOLE { "" }
+  | HOLE 
+    { ("IFUCKEDUP!-sorted_term->HOLE") }
 ;
 
 formula:
@@ -125,11 +126,11 @@ formula:
   | LPAREN IFTE formula formula formula RPAREN
     { (concat_sp_sep_4 "ite" $3 $4 $5) }
   | LPAREN EQUALS sort sorted_term sorted_term RPAREN
-    { "IFUCKEDUP!" }
+    { "IFUCKEDUP!-formula->EQUALS" }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!" }
+    { "IFUCKEDUP!-formula->LET" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!" }
+    { "IFUCKEDUP!-formula->FLET" }
   | LPAREN P_APP sorted_term RPAREN { $3 }
   | HOLE { "" }
 ;
