@@ -23,33 +23,16 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token SC PROGRAM AT
 %token VAR HOLDS
 %token CLC CLN POS NEG
-%token SATLEM_SIMPLIFY SATLEM RRES QRES
-%token CONCAT_CL CLR
-%token CNFN CNFC CNF_HOLDS CNFN_PROOF CNFC_PROOF
+%token SATLEM_SIMPLIFY SATLEM RRES QRES CONCAT_CL CLR CNFN CNFC CNF_HOLDS CNFN_PROOF CNFC_PROOF
 %token TH_HOLDS TRUE FALSE NOT AND OR IMPL
-%token IFF XOR IFTE TERM EQUALS ITE LET FLET
-%token BOOL P_APP T_TRUE T_FALSE T_T_NEQ_F
-%token PRED_EQ_T PRED_EQ_F F_TO_B
-%token TRUE_PREDS_EQUAL FALSE_PREDS_EQUAL
-%token PRED_REFL_POS PRED_REFL_NEG
-%token PRED_NOT_IFF_F PRED_NOT_IFF_F_2
-%token PRED_NOT_IFF_T PRED_NOT_IFF_T_2
-%token PRED_IFF_F PRED_IFF_F_2
-%token PRED_IFF_T PRED_IFF_T_2
-%token DECL_ATOM DECL_BVATOM
-%token CLAUSIFY_FORM CLAUSIFY_FORM_NOT
-%token CLAUSIFY_FALSE TH_LET_PF
-%token IFF_SYMM CONTRAD TRUTH NOT_NOT_INTRO
-%token NOT_NOT_ELIM OR_ELIM_1 OR_ELIM_2
-%token NOT_OR_ELIM AND_ELIM_1 AND_ELIM_2
-%token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM
-%token NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2
-%token NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
-%token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2
-%token ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
-%token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF
-%token TRUST TRUST_F ARROW APPLY REFL SYMM
-%token TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
+%token IFF XOR IFTE TERM EQUALS ITE LET FLET BOOL P_APP T_TRUE T_FALSE T_T_NEQ_F PRED_EQ_T PRED_EQ_F F_TO_B
+%token TRUE_PREDS_EQUAL FALSE_PREDS_EQUAL PRED_REFL_POS PRED_REFL_NEG PRED_NOT_IFF_F PRED_NOT_IFF_F_2
+%token PRED_NOT_IFF_T PRED_NOT_IFF_T_2 PRED_IFF_F PRED_IFF_F_2 PRED_IFF_T PRED_IFF_T_2
+%token DECL_ATOM DECL_BVATOM CLAUSIFY_FORM CLAUSIFY_FORM_NOT CLAUSIFY_FALSE TH_LET_PF
+%token IFF_SYMM CONTRAD TRUTH NOT_NOT_INTRO NOT_NOT_ELIM OR_ELIM_1 OR_ELIM_2 NOT_OR_ELIM AND_ELIM_1 AND_ELIM_2
+%token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2 NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
+%token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2 ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
+%token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
 %token SORT
 
 %start command
@@ -81,18 +64,36 @@ cnf:
   | HOLE { "" }
 ;
 
-arrow_sort:
+fixed_sort:
   | BOOL { "Bool" }
-  | LPAREN ARROW arrow_sort arrow_sort RPAREN
-    { ("("^$3^")"^" "^$4^")") }
+;
+
+arrow_sort_rec:
+  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
+    { (" "^$3^$4) }
+  | fixed_sort { (") "^$1) }
+;
+
+arrow_sort_init:
+  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
+    { ("("^$3^$4) }
 ;
 
 sort:
-  | LPAREN ARROW arrow_sort arrow_sort RPAREN 
-    { ("("^$3^")"^" "^$4^")") }
+  | fixed_sort { $1 }
+  | arrow_sort_init { $1 }
   | IDENT { "IFUCKEDUP!-sort->IDENT" }
   | HOLE { "IFUCKEDUP!-sort->HOLE" }
 ;
+
+apply_rec:
+  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
+    { ($5^" "^$6) }
+  | sorted_term { $1 }
+
+apply_init:
+  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
+    { ("("^$5^" "^$6^")")}
 
 sorted_term:
   | LPAREN ITE sort formula sorted_term sorted_term RPAREN
@@ -101,8 +102,9 @@ sorted_term:
   | T_FALSE { "false" }
   | LPAREN F_TO_B formula RPAREN
     { $3 }
-  | LPAREN APPLY sort sort sorted_term sorted_term RPAREN
-    { concat_sp_sep_2 $5 $6 }
+  | apply_init { $1 }
+  /*LPAREN APPLY sort sort sorted_term sorted_term RPAREN
+    { concat_sp_sep_2 $5 $6 }*/
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -281,15 +283,15 @@ proof_term:
 
 typed_var:
   | IDENT VAR { "IFUCKEDUP!-typed_var->IDENT VAR" }
-  | IDENT LPAREN TERM BOOL RPAREN
+  | IDENT LPAREN TERM fixed_sort RPAREN
     { ("(declare-fun "^$1^" () Bool)") }
-  | IDENT LPAREN TERM sort RPAREN 
+  | IDENT LPAREN TERM arrow_sort_init RPAREN 
     { ("(declare-fun "^$1^" "^$4^")") }
   | IDENT SORT { ($1^" : sort") }
   | IDENT holds_term 
     { ("(assert "^$2^")")}
 ;
-/*
+/* My attempts to ignore the proof body:
 holds_anything_term:
   | LPAREN ANYTHING RPAREN
     { "" }
