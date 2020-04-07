@@ -188,6 +188,7 @@
       val negtrans2 : t
       val sort : t
       val cong : t
+      val arr : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -346,6 +347,7 @@ rule main buf = parse
   | "negtrans1" { Token.negtrans1 }
   | "negtrans2" { Token.negtrans2 }
   | "cong" { Token.cong }
+  | "Array" { Token.arr }
   | "sort" { Token.sort }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
@@ -640,6 +642,7 @@ and scan_block_comment buf locs = parse
         let negtrans1 = NEGTRANS1
         let negtrans2 = NEGTRANS2
         let cong = CONG
+        let arr = ARRAY
         let sort = SORT
         let rres = RRES
         let qres = QRES

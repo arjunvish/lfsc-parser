@@ -33,7 +33,7 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2 NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
 %token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2 ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
 %token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
-%token SORT
+%token ARRAY SORT
 
 %start command
 %type <unit> command
@@ -66,6 +66,8 @@ cnf:
 
 fixed_sort:
   | BOOL { "Bool" }
+  | LPAREN ARRAY sort sort RPAREN 
+     { (concat_sp_sep_3 "Array" $3 $4) }
 ;
 
 arrow_sort_rec:
@@ -89,11 +91,23 @@ sort:
 apply_rec:
   | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
     { ($5^" "^$6) }
-  | sorted_term { $1 }
+  | sorted_term_without_apply { $1 }
 
 apply_init:
   | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
     { ("("^$5^" "^$6^")")}
+
+sorted_term_without_apply:
+  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
+    { concat_sp_sep_4 "ite" $4 $5 $6 }
+  | T_TRUE { "true" }
+  | T_FALSE { "false" }
+  | LPAREN F_TO_B formula RPAREN
+    { $3 }
+  | IDENT { ($1) }
+  | HOLE 
+    { ("IFUCKEDUP!-sorted_term->HOLE") }
+;
 
 sorted_term:
   | LPAREN ITE sort formula sorted_term sorted_term RPAREN
@@ -103,8 +117,6 @@ sorted_term:
   | LPAREN F_TO_B formula RPAREN
     { $3 }
   | apply_init { $1 }
-  /*LPAREN APPLY sort sort sorted_term sorted_term RPAREN
-    { concat_sp_sep_2 $5 $6 }*/
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -282,15 +294,17 @@ proof_term:
 ;
 
 typed_var:
-  | IDENT VAR { "IFUCKEDUP!-typed_var->IDENT VAR" }
+  | IDENT VAR 
+    { "IFUCKEDUP!-typed_var->IDENT VAR" }
   | IDENT LPAREN TERM fixed_sort RPAREN
-    { ("(declare-fun "^$1^" () Bool)") }
+    { (concat_sp_sep_4 "declare-fun" $1 "()" $4) }
   | IDENT LPAREN TERM arrow_sort_init RPAREN 
-    { ("(declare-fun "^$1^" "^$4^")") }
-  | IDENT SORT { ($1^" : sort") }
+    { (concat_sp_sep_3 "declare-fun" $1 $4) }
+  | IDENT SORT { (concat_sp_sep_3 "declare-sort" $1 "0") }
   | IDENT holds_term 
-    { ("(assert "^$2^")")}
+    { (concat_sp_sep_2 "assert" $2) }
 ;
+
 /* My attempts to ignore the proof body:
 holds_anything_term:
   | LPAREN ANYTHING RPAREN
@@ -302,6 +316,7 @@ proof_anything_term:
     { "" }
 ;
 */
+
 term:
   | LPAREN COLON holds_term proof_term RPAREN
     { "" }
