@@ -33,7 +33,7 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2 NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
 %token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2 ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
 %token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
-%token ARRAY SORT
+%token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT
 
 %start command
 %type <unit> command
@@ -68,6 +68,7 @@ fixed_sort:
   | BOOL { "Bool" }
   | LPAREN ARRAY sort sort RPAREN 
      { (concat_sp_sep_3 "Array" $3 $4) }
+  | IDENT { $1 }
 ;
 
 arrow_sort_rec:
@@ -84,14 +85,14 @@ arrow_sort_init:
 sort:
   | fixed_sort { $1 }
   | arrow_sort_init { $1 }
-  | IDENT { "IFUCKEDUP!-sort->IDENT" }
-  | HOLE { "IFUCKEDUP!-sort->HOLE" }
+  | HOLE { "" }
 ;
 
 apply_rec:
   | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
     { ($5^" "^$6) }
   | sorted_term_without_apply { $1 }
+;
 
 apply_init:
   | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
@@ -104,6 +105,10 @@ sorted_term_without_apply:
   | T_FALSE { "false" }
   | LPAREN F_TO_B formula RPAREN
     { $3 }
+  | LPAREN WRITE sort sort RPAREN 
+    { "store" }
+  | LPAREN READ sort sort RPAREN 
+    { "select" }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -117,6 +122,10 @@ sorted_term:
   | LPAREN F_TO_B formula RPAREN
     { $3 }
   | apply_init { $1 }
+  | LPAREN WRITE sort sort RPAREN 
+    { "store" }
+  | LPAREN READ sort sort RPAREN 
+    { "select" }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -140,7 +149,7 @@ formula:
   | LPAREN IFTE formula formula formula RPAREN
     { (concat_sp_sep_4 "ite" $3 $4 $5) }
   | LPAREN EQUALS sort sorted_term sorted_term RPAREN
-    { "IFUCKEDUP!-formula->EQUALS" }
+    { (concat_sp_sep_3 "=" $4 $5) }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
     { "IFUCKEDUP!-formula->LET" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
@@ -289,6 +298,15 @@ proof_term:
     { concat_sp_sep_3 "negtrans2" $7 $8 }
   | LPAREN CONG sort sort sorted_term sorted_term sorted_term sorted_term proof_term proof_term RPAREN
     { concat_sp_sep_3 "cong" $9 $10 }
+  /*Producing empty output from here on since we don't need output for proof body*/
+  | LPAREN ROW1 sort sort sorted_term sorted_term sorted_term RPAREN
+    { "" }
+  | LPAREN ROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN
+    { "" }
+  | LPAREN NEGATIVEROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN
+    { "" }
+  | LPAREN EXT sort sort sorted_term sorted_term proof_term RPAREN
+    { "" }
   | HOLE { "" }
   | IDENT { (" "^$1^" ") }
 ;
@@ -300,7 +318,8 @@ typed_var:
     { (concat_sp_sep_4 "declare-fun" $1 "()" $4) }
   | IDENT LPAREN TERM arrow_sort_init RPAREN 
     { (concat_sp_sep_3 "declare-fun" $1 $4) }
-  | IDENT SORT { (concat_sp_sep_3 "declare-sort" $1 "0") }
+  | IDENT SORT 
+    { (concat_sp_sep_3 "declare-sort" $1 "0") }
   | IDENT holds_term 
     { (concat_sp_sep_2 "assert" $2) }
 ;

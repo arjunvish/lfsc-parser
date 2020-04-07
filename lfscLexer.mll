@@ -189,6 +189,12 @@
       val sort : t
       val cong : t
       val arr : t
+      val read : t
+      val write : t
+      val row1 : t
+      val row : t
+      val negativerow : t
+      val ext : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -349,6 +355,12 @@ rule main buf = parse
   | "cong" { Token.cong }
   | "Array" { Token.arr }
   | "sort" { Token.sort }
+  | "read" { Token.read }
+  | "write" { Token.write }
+  | "row1" { Token.row1 }
+  | "row" { Token.row }
+  | "negativerow" { Token.negativerow }
+  | "ext" { Token.ext }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -644,6 +656,12 @@ and scan_block_comment buf locs = parse
         let cong = CONG
         let arr = ARRAY
         let sort = SORT
+        let read = READ
+        let write = WRITE
+        let row1 = ROW1
+        let row = ROW
+        let negativerow = NEGATIVEROW
+        let ext = EXT
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
