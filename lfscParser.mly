@@ -27,7 +27,9 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2 NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
 %token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2 ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
 %token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
-%token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT
+%token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT VARBV BITVEC AVARBV TRUST_BAD
+%token ABV BVC BVN
+
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
 %start command
@@ -62,7 +64,9 @@ cnf:
 fixed_sort:
   | BOOL { "Bool" }
   | LPAREN ARRAY sort sort RPAREN 
-     { (concat_sp_sep_3 "Array" $3 $4) }
+    { (concat_sp_sep_3 "Array" $3 $4) }
+  | LPAREN BITVEC INT RPAREN
+    { (concat_sp_sep_3 "_" "BitVec" (string_of_int($3))) }
   | IDENT { $1 }
 ;
 
@@ -121,6 +125,9 @@ sorted_term:
     { "store" }
   | LPAREN READ sort sort RPAREN 
     { "select" }
+  | LPAREN AVARBV INT IDENT RPAREN
+    { $4 }
+  /*| LPAREN ABV INT bvconst RPAREN*/
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -302,6 +309,8 @@ proof_term:
     { "" }
   | LPAREN EXT sort sort sorted_term sorted_term proof_term RPAREN
     { "" }
+  | TRUST_BAD
+    { "" }
   | HOLE { "" }
   | IDENT { (" "^$1^" ") }
 ;
@@ -309,6 +318,8 @@ proof_term:
 typed_var:
   | IDENT VAR 
     { "IFUCKEDUP!-typed_var->IDENT VAR" }
+  | IDENT VARBV
+    { (concat_sp_sep_4 "declare-fun" $1 "()" "(_ BitVec )") }
   | IDENT LPAREN TERM fixed_sort RPAREN
     { (concat_sp_sep_4 "declare-fun" $1 "()" $4) }
   | IDENT LPAREN TERM arrow_sort_init RPAREN 

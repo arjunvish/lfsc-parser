@@ -3,7 +3,10 @@
 (% p (term Bool)
 (% A1 (th_holds true)
 (% A0 (th_holds (and (p_app p) (not (p_app p))))
-
+(% f (term (arrow (BitVec 4) (BitVec 4)))
+(% v1 var_bv
+(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A0 (th_holds (not (= (BitVec 4) (apply _ _ f (apply _ _ g (apply _ _ h (a_var_bv 4 v0)))) (apply _ _ f (apply _ _ g (apply _ _ h (a_var_bv 4 v1)))))))
 (% Element sort
 (% Index sort
 (% a2 (term (Array Index Element))
@@ -41,6 +44,6 @@
 ;; Bit-blasting learned clauses 
 
 ;; Printing final unsat proof 
-(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty))))))))))))))))))))))))
+(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty))))))))))))))))))))))))))))
 ;;
 

@@ -195,6 +195,13 @@
       val row : t
       val negativerow : t
       val ext : t
+      val varbv : t
+      val bitvec : t
+      val avarbv : t
+      val trustbad : t
+      val abv : t
+      val bvc : t
+      val bvn : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -361,6 +368,13 @@ rule main buf = parse
   | "row" { Token.row }
   | "negativerow" { Token.negativerow }
   | "ext" { Token.ext }
+  | "var_bv" { Token.varbv }
+  | "BitVec" { Token.bitvec }
+  | "a_var_bv" { Token.avarbv }
+  | "trust-bad" { Token.trustbad }
+  | "a_bv" { Token.abv }
+  | "bvc" { Token.bvc }
+  | "bvn" { Token.bvn }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -662,6 +676,13 @@ and scan_block_comment buf locs = parse
         let row = ROW
         let negativerow = NEGATIVEROW
         let ext = EXT
+        let varbv = VARBV
+        let bitvec = BITVEC
+        let avarbv = AVARBV
+        let trustbad = TRUSTBAD
+        let abv = ABV
+        let bvc = BVC
+        let bvn = BVN
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
