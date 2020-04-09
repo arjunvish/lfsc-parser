@@ -1,7 +1,9 @@
+unsat
 (check
-;; Declarations
-(% p (term Bool)
-(% A1 (th_holds true)
+ ;; Declarations
+(% v0 var_bv
+(% v1 var_bv
+(% A10 (th_holds true)
 (% A3 (th_holds (bvule 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (% A2 (th_holds (bvult 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b1 (bvc b1 (bvc b1 (bvc b1  bvn)))))))
@@ -14,22 +16,23 @@
 (% A9 (th_holds (bvsge 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (: (holds cln)
 
-;; Printing deferred declarations 
+ ;; Printing deferred declarations 
 
 
-;; Printing the global let map ;; Printing aliasing declarations 
+ ;; Printing the global let map ;; Printing aliasing declarations 
 
 
-;; Rewrites for Lemmas 
+ ;; Rewrites for Lemmas 
 
-;; In the preprocessor we trust 
-(th_let_pf _ (trust_f (and (p_app p) (not (p_app p)))) (\ .PA240
+ ;; In the preprocessor we trust 
+(th_let_pf _ (trust_f (bvult 4  (a_var_bv 4 v1) (a_var_bv 4 v0))) (\ .PA273
+(th_let_pf _ (trust_f (not (bvult 4  (a_var_bv 4 v1) (a_var_bv 4 v0)))) (\ .PA274
 
 ;; Printing mapping from preprocessed assertions into atoms 
-(decl_atom (p_app p) (\ .v2 (\ .a2
-(satlem _ _ (asf _ _ _ .a2 (\ .l4 (clausify_false (contra _ (and_elim_1 _ _ .PA240) .l4)))) (\ .pb4
-(satlem _ _ (ast _ _ _ .a2 (\ .l5 (clausify_false (contra _ .l5 (and_elim_2 _ _ .PA240))))) (\ .pb5
-;; Theory Lemmas 
+(decl_atom (bvult 4  (a_var_bv 4 v1) (a_var_bv 4 v0)) (\ .v5 (\ .a5
+(satlem _ _ (ast _ _ _ .a5 (\ .l11 (clausify_false (contra _ .l11 .PA274)))) (\ .pb7
+(satlem _ _ (asf _ _ _ .a5 (\ .l10 (clausify_false (contra _ .PA273 .l10)))) (\ .pb8
+ ;; Theory Lemmas 
 
 ;; BB atom mapping
 
@@ -37,9 +40,8 @@
 ;; Bit-blasting definitional clauses 
 
 
-;; Bit-blasting learned clauses 
+ ;; Bit-blasting learned clauses 
 
 ;; Printing final unsat proof 
-(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty)))))))))))))))))))))))))
+(satlem_simplify _ _ _ (R _ _ .pb8 .pb7 .v5) (\ empty empty))))))))))))))))))))))))))))
 ;;
-

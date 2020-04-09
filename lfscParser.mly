@@ -30,7 +30,7 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT VARBV BITVEC AVARBV TRUSTBAD
 %token ABV BVC BVN B0 B1 BVDISEQ BVAND BVOR BVXOR BVNAND BVNOR BVXNOR BVMUL BVADD BVSUB BVUDIV BVUREM
 %token BVSDIV BVSREM BVSMOD BVSHL BVLSHR BVASHR BVCONCAT BVNEG BVNOT BVLROTATE BVRROTATE BVCOMP
-%token BVEXTRACT BVZEROEXT BVSIGNEXT BVREPEAT
+%token BVEXTRACT BVZEROEXT BVSIGNEXT BVREPEAT BVULT BVULE BVUGT BVUGE BVSLT BVSLE BVSGT BVSGE
 
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
@@ -232,11 +232,27 @@ formula:
     { (concat_sp_sep_4 "ite" $3 $4 $5) }
   | LPAREN EQUALS sort sorted_term sorted_term RPAREN
     { (concat_sp_sep_3 "=" $4 $5) }
+  | LPAREN P_APP sorted_term RPAREN { $3 }
+  | LPAREN BVULT INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvult" $4 $5) }
+  | LPAREN BVULE INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvule" $4 $5) }
+  | LPAREN BVUGT INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvugt" $4 $5) }
+  | LPAREN BVUGE INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvuge" $4 $5) }
+  | LPAREN BVSLT INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvslt" $4 $5) }
+  | LPAREN BVSLE INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvsle" $4 $5) }
+  | LPAREN BVSGT INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvsgt" $4 $5) }
+  | LPAREN BVSGE INT sorted_bv_term sorted_bv_term RPAREN
+    { (concat_sp_sep_3 "bvsge" $4 $5) }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
     { "IFUCKEDUP!-formula->LET" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
     { "IFUCKEDUP!-formula->FLET" }
-  | LPAREN P_APP sorted_term RPAREN { $3 }
   | HOLE { "" }
 ;
 

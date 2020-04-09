@@ -232,6 +232,14 @@
       val bvzeroext : t
       val bvsignext : t
       val bvrepeat : t
+      val bvult : t
+      val bvule : t
+      val bvugt : t
+      val bvuge : t
+      val bvslt : t
+      val bvsle : t
+      val bvsgt : t
+      val bvsge : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -434,6 +442,14 @@ rule main buf = parse
   | "zero_extend" { Token.bvzeroext }
   | "sign_extend" { Token.bvsignext }
   | "repeat" { Token.bvrepeat }
+  | "bvult" { Token.bvult }
+  | "bvule" { Token.bvule }
+  | "bvugt" { Token.bvugt }
+  | "bvuge" { Token.bvuge }
+  | "bvslt" { Token.bvslt }
+  | "bvsle" { Token.bvsle }
+  | "bvsgt" { Token.bvsgt }
+  | "bvsge" { Token.bvsge }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -772,6 +788,14 @@ and scan_block_comment buf locs = parse
         let bvzeroext = BVZEROEXT
         let bvsignext = BVSIGNEXT
         let bvrepeat = BVREPEAT
+        let bvult = BVULT
+        let bvule = BVULE
+        let bvugt = BVUGT
+        let bvuge = BVUGE
+        let bvslt = BVSLT
+        let bvsle = BVSLE
+        let bvsgt = BVSGT
+        let bvsge = BVSGE
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
