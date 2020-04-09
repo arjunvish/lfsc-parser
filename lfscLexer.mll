@@ -223,6 +223,10 @@
       val bvlshr : t
       val bvashr : t
       val bvconcat : t
+      val bvneg : t
+      val bvnot : t
+      val bvrleft : t
+      val bvrright : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -230,7 +234,6 @@
       val block_comment : Lexing.position -> main:s -> s
     end
   end
-
 
   (* Create and populate a hashtable *)
   let mk_hashtbl init =
@@ -417,6 +420,10 @@ rule main buf = parse
   | "bvlshr" { Token.bvlshr }
   | "bvashr" { Token.bvashr }
   | "concat" { Token.bvconcat }
+  | "bvneg" { Token.bvneg }
+  | "bvnot" { Token.bvnot }
+  | "rotate_left" { Token.bvrleft }
+  | "rotate_right" { Token.bvrright }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -746,6 +753,10 @@ and scan_block_comment buf locs = parse
         let bvlshr = BVLSHR
         let bvashr = BVASHR
         let bvconcat = BVCONCAT
+        let bvneg = BVNEG
+        let bvnot = BVNOT
+        let bvrleft = BVRLEFT
+        let bvrright = BVRRIGHT
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =

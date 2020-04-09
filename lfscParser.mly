@@ -29,7 +29,7 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
 %token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT VARBV BITVEC AVARBV TRUSTBAD
 %token ABV BVC BVN B0 B1 BVDISEQ BVAND BVOR BVXOR BVNAND BVNOR BVXNOR BVMUL BVADD BVSUB BVUDIV BVUREM
-%token BVSDIV BVSREM BVSMOD BVSHL BVLSHR BVASHR BVCONCAT
+%token BVSDIV BVSREM BVSMOD BVSHL BVLSHR BVASHR BVCONCAT BVNEG BVNOT BVRLEFT BVRRIGHT
 
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
@@ -156,6 +156,16 @@ sorted_term_without_apply:
     { (concat_sp_sep_3 "bvashr" $4 $5) }
   | LPAREN BVCONCAT INT sorted_term sorted_term RPAREN
     { (concat_sp_sep_3 "concat" $4 $5) }
+  | LPAREN BVNEG INT sorted_term RPAREN
+    { (concat_sp_sep_2 "bvneg" $4) }
+  | LPAREN BVNOT INT sorted_term RPAREN
+    { (concat_sp_sep_2 "bvnot" $4) }
+  | LPAREN BVRLEFT INT sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_left" (string_of_int $3)) 
+                       $4) }
+  | LPAREN BVRRIGHT INT sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_right" (string_of_int $3)) 
+                       $4) }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -213,6 +223,16 @@ sorted_term:
     { (concat_sp_sep_3 "bvashr" $4 $5) }
   | LPAREN BVCONCAT INT sorted_term sorted_term RPAREN
     { (concat_sp_sep_3 "concat" $4 $5) }
+  | LPAREN BVNEG INT sorted_term RPAREN
+    { (concat_sp_sep_2 "bvneg" $4) }
+  | LPAREN BVNOT INT sorted_term RPAREN
+    { (concat_sp_sep_2 "bvnot" $4) }
+  | LPAREN BVRLEFT INT sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_left" (string_of_int $3)) 
+                       $4) }
+  | LPAREN BVRRIGHT INT sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_right" (string_of_int $3)) 
+                       $4) }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
