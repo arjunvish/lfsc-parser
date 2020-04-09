@@ -202,6 +202,27 @@
       val abv : t
       val bvc : t
       val bvn : t
+      val b0 : t
+      val b1 : t
+      val bvdiseq : t
+      val bvand : t
+      val bvor : t
+      val bvxor : t
+      val bvnand : t
+      val bvnor : t
+      val bvxnor : t
+      val bvmul : t
+      val bvadd : t
+      val bvsub : t
+      val bvudiv : t
+      val bvurem : t
+      val bvsdiv : t
+      val bvsrem : t
+      val bvsmod : t
+      val bvshl : t
+      val bvlshr : t
+      val bvashr : t
+      val bvconcat : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -375,6 +396,27 @@ rule main buf = parse
   | "a_bv" { Token.abv }
   | "bvc" { Token.bvc }
   | "bvn" { Token.bvn }
+  | "b0" { Token.b0 }
+  | "b1" { Token.b1 }
+  | "bv_disequal_constants" { Token.bvdiseq }
+  | "bvand" { Token.bvand }
+  | "bvor" { Token.bvor }
+  | "bvxor" { Token.bvxor }
+  | "bvnand" { Token.bvnand }
+  | "bvnor" { Token.bvnor }
+  | "bvxnor" { Token.bvxnor }
+  | "bvmul" { Token.bvmul }
+  | "bvadd" { Token.bvadd }
+  | "bvsub" { Token.bvsub }
+  | "bvudiv" { Token.bvudiv }
+  | "bvurem" { Token.bvurem }
+  | "bvsdiv" { Token.bvsdiv }
+  | "bvsrem" { Token.bvsrem }
+  | "bvsmod" { Token.bvsmod }
+  | "bvshl" { Token.bvshl }
+  | "bvlshr" { Token.bvlshr }
+  | "bvashr" { Token.bvashr }
+  | "concat" { Token.bvconcat }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -683,6 +725,27 @@ and scan_block_comment buf locs = parse
         let abv = ABV
         let bvc = BVC
         let bvn = BVN
+        let b0 = B0
+        let b1 = B1
+        let bvdiseq = BVDISEQ
+        let bvand = BVAND
+        let bvor = BVOR
+        let bvxor = BVXOR
+        let bvnand = BVNAND
+        let bvnor = BVNOR
+        let bvxnor = BVXNOR
+        let bvmul = BVMUL
+        let bvadd = BVADD
+        let bvsub = BVSUB
+        let bvudiv = BVUDIV
+        let bvurem = BVUREM
+        let bvsdiv = BVSDIV
+        let bvsrem = BVSREM
+        let bvsmod = BVSMOD
+        let bvshl = BVSHL
+        let bvlshr = BVLSHR
+        let bvashr = BVASHR
+        let bvconcat = BVCONCAT
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =

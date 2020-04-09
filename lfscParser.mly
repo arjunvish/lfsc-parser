@@ -27,8 +27,9 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token NOT_AND_ELIM IMPL_INTRO IMPL_ELIM NOT_IMPL_ELIM IFF_ELIM_1 IFF_ELIM_2 NOT_IFF_ELIM XOR_ELIM_1 XOR_ELIM_2
 %token NOT_XOR_ELIM  ITE_ELIM_1 ITE_ELIM_2 ITE_ELIM_3 NOT_ITE_ELIM_1 NOT_ITE_ELIM_2
 %token NOT_ITE_ELIM_3 AST ASF BV_AST BV_ASF TRUST TRUST_F ARROW APPLY REFL SYMM TRANS NEGSYMM NEGTRANS1 NEGTRANS2 CONG
-%token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT VARBV BITVEC AVARBV TRUST_BAD
-%token ABV BVC BVN
+%token ARRAY SORT READ WRITE ROW1 ROW NEGATIVEROW EXT VARBV BITVEC AVARBV TRUSTBAD
+%token ABV BVC BVN B0 B1 BVDISEQ BVAND BVOR BVXOR BVNAND BVNOR BVXNOR BVMUL BVADD BVSUB BVUDIV BVUREM
+%token BVSDIV BVSREM BVSMOD BVSHL BVLSHR BVASHR BVCONCAT
 
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
@@ -96,6 +97,13 @@ apply_rec:
 apply_init:
   | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
     { ("("^$5^" "^$6^")")}
+;
+
+bvconst:
+  | LPAREN BVC B0 bvconst RPAREN { ("0"^$4) }
+  | LPAREN BVC B1 bvconst RPAREN { ("1"^$4) }
+  | BVN { "" }
+;
 
 sorted_term_without_apply:
   | LPAREN ITE sort formula sorted_term sorted_term RPAREN
@@ -108,6 +116,46 @@ sorted_term_without_apply:
     { "store" }
   | LPAREN READ sort sort RPAREN 
     { "select" }
+  | LPAREN AVARBV INT IDENT RPAREN
+    { $4 }
+  | LPAREN ABV INT bvconst RPAREN
+    { ("#b"^$4) }
+  | LPAREN BVAND INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvand" $4 $5) }
+  | LPAREN BVOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvor" $4 $5) }
+  | LPAREN BVXOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxor" $4 $5) }
+  | LPAREN BVNAND INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnand" $4 $5) }
+  | LPAREN BVNOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnor" $4 $5) }
+  | LPAREN BVXNOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxnor" $4 $5) }
+  | LPAREN BVMUL INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvmul" $4 $5) }
+  | LPAREN BVADD INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvadd" $4 $5) }
+  | LPAREN BVSUB INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsub" $4 $5) }
+  | LPAREN BVUDIV INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvudiv" $4 $5) }
+  | LPAREN BVUREM INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvurem" $4 $5) }
+  | LPAREN BVSDIV INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsdiv" $4 $5) }
+  | LPAREN BVSREM INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsrem" $4 $5) }
+  | LPAREN BVSMOD INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsmod" $4 $5) }
+  | LPAREN BVSHL INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvshl" $4 $5) }
+  | LPAREN BVLSHR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvlshr" $4 $5) }
+  | LPAREN BVASHR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvashr" $4 $5) }
+  | LPAREN BVCONCAT INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "concat" $4 $5) }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -127,7 +175,44 @@ sorted_term:
     { "select" }
   | LPAREN AVARBV INT IDENT RPAREN
     { $4 }
-  /*| LPAREN ABV INT bvconst RPAREN*/
+  | LPAREN ABV INT bvconst RPAREN
+    { ("#b"^$4) }
+  | LPAREN BVAND INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvand" $4 $5) }
+  | LPAREN BVOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvor" $4 $5) }
+  | LPAREN BVXOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxor" $4 $5) }
+  | LPAREN BVNAND INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnand" $4 $5) }
+  | LPAREN BVNOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnor" $4 $5) }
+  | LPAREN BVXNOR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxnor" $4 $5) }
+  | LPAREN BVMUL INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvmul" $4 $5) }
+  | LPAREN BVADD INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvadd" $4 $5) }
+  | LPAREN BVSUB INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsub" $4 $5) }
+  | LPAREN BVUDIV INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvudiv" $4 $5) }
+  | LPAREN BVUREM INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvurem" $4 $5) }
+  | LPAREN BVSDIV INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsdiv" $4 $5) }
+  | LPAREN BVSREM INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsrem" $4 $5) }
+  | LPAREN BVSMOD INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsmod" $4 $5) }
+  | LPAREN BVSHL INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvshl" $4 $5) }
+  | LPAREN BVLSHR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvlshr" $4 $5) }
+  | LPAREN BVASHR INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvashr" $4 $5) }
+  | LPAREN BVCONCAT INT sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "concat" $4 $5) }
   | IDENT { ($1) }
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
@@ -309,7 +394,9 @@ proof_term:
     { "" }
   | LPAREN EXT sort sort sorted_term sorted_term proof_term RPAREN
     { "" }
-  | TRUST_BAD
+  | TRUSTBAD
+    { "" }
+  | LPAREN BVDISEQ INT bvconst bvconst RPAREN
     { "" }
   | HOLE { "" }
   | IDENT { (" "^$1^" ") }

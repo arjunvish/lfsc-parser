@@ -4,13 +4,12 @@
 (% A1 (th_holds true)
 (% A0 (th_holds (and (p_app p) (not (p_app p))))
 (% f (term (arrow (BitVec 4) (BitVec 4)))
-(% v1 var_bv
+(% A2 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (bvand 4 (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))))))
 (% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (% A0 (th_holds (not (= (BitVec 4) (apply _ _ f (apply _ _ g (apply _ _ h (a_var_bv 4 v0)))) (apply _ _ f (apply _ _ g (apply _ _ h (a_var_bv 4 v1)))))))
-(% Element sort
-(% Index sort
-(% a2 (term (Array Index Element))
-(% i1 (term Index)
+(% A2 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
+(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
+(% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_var_bv 4 v1)))(% i1 (term Index)
 (% a1 (term (Array Index Element))
 (% A2 (th_holds true)
 (% A1 (th_holds (not (= (Array Index Element) a1 a2)))

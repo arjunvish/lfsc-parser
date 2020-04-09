@@ -72,7 +72,6 @@
 
 (declare bvand bvop2)
 (declare bvor bvop2)
-(declare bvor bvop2)
 (declare bvxor bvop2)
 (declare bvnand bvop2)
 (declare bvnor bvop2)
