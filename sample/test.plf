@@ -6,8 +6,8 @@
 (% A2 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (% A5 (th_holds (= (BitVec 4) (a_var_bv 4 v2) (a_var_bv 4 v3)))
 (% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (repeat 4  4 _  (bvcomp 2 (extract 2  1 0 4 (a_bv 4 (bvc b0 (bvc b0 (bvc b1 (bvc b1  bvn)))))) (extract 2  3 2 4 (a_bv 4 (bvc b0 (bvc b0 (bvc b1 (bvc b1  bvn))))))))))
-(% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (rotate_right 4  (rotate_left 4  (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b1  bvn)))))))))
-(% A3 (th_holds (= (BitVec 4) (a_var_bv 4 v2) (zero_extend 4  2 _  (extract 2  1 0 4 (a_bv 4 (bvc b0 (bvc b0 (bvc b1 (bvc b1  bvn)))))))))
+(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (bvand 4 (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_bv 4 (bvc b0 (bvc b1 (bvc b0 (bvc b1  bvn))))))))
+(% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (bvnot 4  (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn))))))))
 
 (: (holds cln)
 
