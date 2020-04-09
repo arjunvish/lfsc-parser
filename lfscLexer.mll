@@ -227,6 +227,11 @@
       val bvnot : t
       val bvrleft : t
       val bvrright : t
+      val bvcomp : t
+      val bvextract : t
+      val bvzeroext : t
+      val bvsignext : t
+      val bvrepeat : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -424,6 +429,11 @@ rule main buf = parse
   | "bvnot" { Token.bvnot }
   | "rotate_left" { Token.bvrleft }
   | "rotate_right" { Token.bvrright }
+  | "bvcomp" { Token.bvcomp }
+  | "extract" { Token.bvextract }
+  | "zero_extend" { Token.bvzeroext }
+  | "sign_extend" { Token.bvsignext }
+  | "repeat" { Token.bvrepeat }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -755,8 +765,13 @@ and scan_block_comment buf locs = parse
         let bvconcat = BVCONCAT
         let bvneg = BVNEG
         let bvnot = BVNOT
-        let bvrleft = BVRLEFT
-        let bvrright = BVRRIGHT
+        let bvrleft = BVLROTATE
+        let bvrright = BVRROTATE
+        let bvcomp = BVCOMP
+        let bvextract = BVEXTRACT
+        let bvzeroext = BVZEROEXT
+        let bvsignext = BVSIGNEXT
+        let bvrepeat = BVREPEAT
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
