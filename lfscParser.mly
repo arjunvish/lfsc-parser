@@ -31,6 +31,8 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token ABV BVC BVN B0 B1 BVDISEQ BVAND BVOR BVXOR BVNAND BVNOR BVXNOR BVMUL BVADD BVSUB BVUDIV BVUREM
 %token BVSDIV BVSREM BVSMOD BVSHL BVLSHR BVASHR BVCONCAT BVNEG BVNOT BVLROTATE BVRROTATE BVCOMP
 %token BVEXTRACT BVZEROEXT BVSIGNEXT BVREPEAT BVULT BVULE BVUGT BVUGE BVSLT BVSLE BVSGT BVSGE
+%token BBLTN BBLTC TRUSTBBLASTTERM DECLBBLAST DECLBBLASTWITHALIAS BITOF BVBBLCONST BVBBLVAR INTROASSUMPT INTROASSUMPF
+%token BVBBLEQ BVBBLNEQ BVBBLEQSWAP
 
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
@@ -54,6 +56,7 @@ clause:
   | LPAREN CLR lit clause RPAREN
     { ("clr "^$3^" "^$4) }
   | HOLE { "" }
+  | IDENT { "" }
 ;
 
 cnf:
@@ -106,6 +109,32 @@ bvconst:
   | BVN { "" }
 ;
 
+bblt:
+  | BBLTN { "" }
+  | LPAREN BBLTC formula bblt RPAREN { "" }
+  | HOLE { "" }
+  | IDENT { "" }
+;
+
+bblast_term:
+  | LPAREN TRUSTBBLASTTERM INT sorted_term bblt RPAREN { "" }
+  | LPAREN BVBBLCONST INT bblt bvconst RPAREN { "" }
+  | LPAREN BVBBLVAR INT sorted_term bblt RPAREN { "" }
+  | IDENT { "" }
+  /*| LPAREN BVBBLCONCAT INT INT INT */
+;
+/*(declare bv_bbl_concat (! n mpz
+	 	       (! m mpz
+		       (! m1 mpz
+                       (! x (term (BitVec m))
+		       (! y (term (BitVec m1))
+		       (! xb bblt
+		       (! yb bblt
+		       (! rb bblt
+		       (! xbb (bblast_term m x xb)
+		       (! ybb (bblast_term m1 y yb)
+                       (! c (^ (bblast_concat xb yb ) rb)
+                           (bblast_term n (concat n m m1 x y) rb)))))))))))))*/
 int_or_hole:
   | INT { "" }
   | HOLE { "" }
@@ -207,8 +236,8 @@ sorted_term:
     { "store" }
   | LPAREN READ sort sort RPAREN 
     { "select" }   
-  | sorted_bv_term { $1 }   
   | IDENT { ($1) }
+  | sorted_bv_term { $1 }   
   | HOLE 
     { ("IFUCKEDUP!-sorted_term->HOLE") }
 ;
@@ -249,6 +278,7 @@ formula:
     { (concat_sp_sep_3 "bvsgt" $4 $5) }
   | LPAREN BVSGE INT sorted_bv_term sorted_bv_term RPAREN
     { (concat_sp_sep_3 "bvsge" $4 $5) }
+  | LPAREN BITOF sorted_term INT RPAREN { "" }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
     { "IFUCKEDUP!-formula->LET" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
@@ -407,7 +437,21 @@ proof_term:
     { "" }
   | TRUSTBAD
     { "" }
-  | LPAREN BVDISEQ INT bvconst bvconst RPAREN
+  | LPAREN BVDISEQ int_or_hole bvconst bvconst RPAREN
+    { "" }
+  | LPAREN DECLBBLAST int_or_hole bblt sorted_term bblast_term proof_term RPAREN
+    { "" }
+  | LPAREN DECLBBLASTWITHALIAS int_or_hole bblt sorted_term sorted_term bblast_term proof_term proof_term RPAREN
+    { "" }
+  | LPAREN INTROASSUMPT formula proof_term clause proof_term proof_term proof_term RPAREN
+    { "" }
+  | LPAREN INTROASSUMPF formula proof_term clause proof_term proof_term proof_term RPAREN
+    { "" }
+  | LPAREN BVBBLEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
+    { "" }
+  | LPAREN BVBBLNEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
+    { "" }
+  | LPAREN BVBBLEQSWAP int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
     { "" }
   | HOLE { "" }
   | IDENT { (" "^$1^" ") }

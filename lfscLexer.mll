@@ -240,6 +240,19 @@
       val bvsle : t
       val bvsgt : t
       val bvsge : t
+      val bbltn : t
+      val bbltc : t
+      val trust_bblast_term : t
+      val decl_bblast : t
+      val decl_bblast_with_alias : t
+      val bitof : t
+      val bv_bbl_const : t
+      val bv_bbl_var : t
+      val intro_assump_t : t
+      val intro_assump_f : t
+      val bv_bbl_eq : t
+      val bv_bbl_neq : t
+      val bv_bbl_eq_swap : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -450,6 +463,19 @@ rule main buf = parse
   | "bvsle" { Token.bvsle }
   | "bvsgt" { Token.bvsgt }
   | "bvsge" { Token.bvsge }
+  | "bbltn" { Token.bbltn }
+  | "bbltc" { Token.bbltc }
+  | "trust_bblast_term" { Token.trust_bblast_term }
+  | "decl_bblast" { Token.decl_bblast }
+  | "decl_bblast_with_alias" { Token.decl_bblast_with_alias }
+  | "bitof" { Token.bitof }
+  | "bv_bbl_const" { Token.bv_bbl_const }
+  | "bv_bbl_var" { Token.bv_bbl_var }
+  | "intro_assump_t" { Token.intro_assump_t }
+  | "intro_assump_f" { Token.intro_assump_f }
+  | "bv_bbl_=" { Token.bv_bbl_eq }
+  | "bv_bbl_=_false" { Token.bv_bbl_eq }
+  | "bv_bbl_=_swap" { Token.bv_bbl_eq_swap }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -796,6 +822,19 @@ and scan_block_comment buf locs = parse
         let bvsle = BVSLE
         let bvsgt = BVSGT
         let bvsge = BVSGE
+        let bbltn = BBLTN
+        let bbltc = BBLTC
+        let trust_bblast_term = TRUSTBBLASTTERM
+        let decl_bblast = DECLBBLAST
+        let decl_bblast_with_alias = DECLBBLASTWITHALIAS
+        let bitof = BITOF
+        let bv_bbl_const = BVBBLCONST
+        let bv_bbl_var = BVBBLVAR
+        let intro_assump_t = INTROASSUMPT
+        let intro_assump_f = INTROASSUMPF
+        let bv_bbl_eq = BVBBLEQ
+        let bv_bbl_neq = BVBBLNEQ
+        let bv_bbl_eq_swap = BVBBLEQSWAP
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =

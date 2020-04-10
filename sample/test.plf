@@ -1,17 +1,11 @@
 (check
 ;; Declarations
-(% p (term Bool)
-(% A1 (th_holds true)
-(% A3 (th_holds (bvule 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A2 (th_holds (bvult 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b1 (bvc b1 (bvc b1 (bvc b1  bvn)))))))
+(% v1 var_bv
+(% v0 var_bv
+(% A3 (th_holds true)
+(% A2 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
 (% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
-(% A4 (th_holds (bvugt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A5 (th_holds (bvuge 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A6 (th_holds (bvslt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A7 (th_holds (bvsle 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A8 (th_holds (bvsgt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
-(% A9 (th_holds (bvsge 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (: (holds cln)
 
 ;; Printing deferred declarations 
@@ -23,23 +17,40 @@
 ;; Rewrites for Lemmas 
 
 ;; In the preprocessor we trust 
-(th_let_pf _ (trust_f (and (p_app p) (not (p_app p)))) (\ .PA240
+(th_let_pf _ (trust_f (= (BitVec 4) (a_var_bv 4 v1) (a_var_bv 4 v0))) (\ .PA266
+(th_let_pf _ (trust_f (= (BitVec 4) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v1))) (\ .PA265
+(th_let_pf _ (trust_f (= (BitVec 4) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v0))) (\ .PA264
 
 ;; Printing mapping from preprocessed assertions into atoms 
-(decl_atom (p_app p) (\ .v2 (\ .a2
-(satlem _ _ (asf _ _ _ .a2 (\ .l4 (clausify_false (contra _ (and_elim_1 _ _ .PA240) .l4)))) (\ .pb4
-(satlem _ _ (ast _ _ _ .a2 (\ .l5 (clausify_false (contra _ .l5 (and_elim_2 _ _ .PA240))))) (\ .pb5
+(decl_atom (= (BitVec 4) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v0)) (\ .v2 (\ .a2
+(decl_atom (= (BitVec 4) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v1)) (\ .v3 (\ .a3
+(decl_atom (= (BitVec 4) (a_var_bv 4 v1) (a_var_bv 4 v0)) (\ .v4 (\ .a4
+(satlem _ _ (asf _ _ _ .a2 (\ .l4 (clausify_false (contra _ .PA264 .l4)))) (\ .pb4
+(satlem _ _ (asf _ _ _ .a3 (\ .l6 (clausify_false (contra _ .PA265 .l6)))) (\ .pb5
+(satlem _ _ (asf _ _ _ .a4 (\ .l8 (clausify_false (contra _ .PA266 .l8)))) (\ .pb6
 ;; Theory Lemmas 
 
 ;; BB atom mapping
 
-
-;; Bit-blasting definitional clauses 
-
-
-;; Bit-blasting learned clauses 
-
-;; Printing final unsat proof 
-(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty)))))))))))))))))))))))))
-;;
-
+(decl_bblast _ _ _ (bv_bbl_const 4 _ (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn)))))(\ bt241
+(decl_bblast _ _ _ (bv_bbl_var 4 v0 _)(\ bt239
+(decl_bblast _ _ _ (bv_bbl_const 4 _ (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn)))))(\ bt261
+(decl_bblast _ _ _ (bv_bbl_var 4 v1 _)(\ bt240
+(th_let_pf _ (bv_bbl_= _ _ _ _ _ _ bt240 bt239)(\ .PA317
+(th_let_pf _ (bv_bbl_= _ _ _ _ _ _ bt261 bt240)(\ .PA302
+(th_let_pf _ (bv_bbl_= _ _ _ _ _ _ bt241 bt239)(\ .PA283
+(decl_atom true (\ bb.v0 (\ bb.a0
+(decl_atom false (\ bb.v1 (\ bb.a1
+(decl_atom (= (BitVec 4) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v0)) (\ bb.v2 (\ bb.a2
+(decl_atom (= (BitVec 4) (a_bv 4 (bvc b1 (bvc b0 (bvc b0 (bvc b0  bvn))))) (a_var_bv 4 v1)) (\ bb.v12 (\ bb.a12
+(decl_atom (= (BitVec 4) (a_var_bv 4 v1) (a_var_bv 4 v0)) (\ bb.v22 (\ bb.a22
+(decl_atom (bitof v0 3) (\ bb.v9 (\ bb.a9
+(decl_atom (iff false (bitof v0 3)) (\ bb.v10 (\ bb.a10
+(decl_atom (and (iff false (bitof v0 0)) (and (iff false (bitof v0 1)) (and (iff false (bitof v0 2)) (iff false (bitof v0 3)) ))) (\ bb.v11 (\ bb.a11
+(decl_atom (bitof v1 3) (\ bb.v19 (\ bb.a19
+(decl_atom (iff true (bitof v1 3)) (\ bb.v20 (\ bb.a20
+(decl_atom (and (iff false (bitof v1 0)) (and (iff false (bitof v1 1)) (and (iff false (bitof v1 2)) (iff true (bitof v1 3)) ))) (\ bb.v21 (\ bb.a21
+(decl_atom (iff (bitof v1 3) (bitof v0 3)) (\ bb.v26 (\ bb.a26
+(decl_atom (and (iff (bitof v1 0) (bitof v0 0)) (and (iff (bitof v1 1) (bitof v0 1)) (and (iff (bitof v1 2) (bitof v0 2)) (iff (bitof v1 3) (bitof v0 3)) ))) 
+(\ bb.v27 (\ bb.a27
+x))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))

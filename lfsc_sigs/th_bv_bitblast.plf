@@ -10,7 +10,8 @@
     ((bbltc b v') (mp_add (bblt_len v') 1))))
 
 
-; (bblast_term x y) means term y corresponds to bit level interpretation x
+; (bblast_term n x y) means term x (of length n) 
+; corresponds to bit level interpretation y
 (declare bblast_term
 	 (! n mpz
 	 (! x (term (BitVec n))
@@ -25,7 +26,8 @@
 	    (bblast_term n x y)))))
 
 
-; Binds a symbol to the bblast_term to be used later on.
+; Binds a symbol t to the bblast_term b 
+; to be used later on in a proof of unsat
 (declare decl_bblast
 	 (! n mpz
 	 (! b bblt
@@ -35,6 +37,8 @@
 	 (! u (! v (bblast_term n t b) (holds cln))
 		   (holds cln))))))))
 
+; Same as decl_bblast, except that 
+; t has alias a, and a replaces t in the proof
 (declare decl_bblast_with_alias
 	 (! n mpz
 	 (! b bblt
