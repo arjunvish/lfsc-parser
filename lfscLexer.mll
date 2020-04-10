@@ -253,6 +253,14 @@
       val bv_bbl_eq : t
       val bv_bbl_neq : t
       val bv_bbl_eq_swap : t
+      val bv_bbl_concat : t
+      val bv_bbl_extract : t
+      val bv_bbl_zero_extend : t
+      val bv_bbl_sign_extend : t
+      val bv_bbl_bvand : t
+      val bv_bbl_bvnot : t
+      val bv_bbl_bvor : t
+      val bv_bbl_bvxor : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -476,6 +484,14 @@ rule main buf = parse
   | "bv_bbl_=" { Token.bv_bbl_eq }
   | "bv_bbl_=_false" { Token.bv_bbl_eq }
   | "bv_bbl_=_swap" { Token.bv_bbl_eq_swap }
+  | "bv_bbl_concat" { Token.bv_bbl_concat }
+  | "bv_bbl_extract" { Token.bv_bbl_extract }
+  | "bv_bbl_zero_extend" { Token.bv_bbl_zero_extend }
+  | "bv_bbl_sign_extend" { Token.bv_bbl_sign_extend }
+  | "bv_bbl_bvand" { Token.bv_bbl_bvand }
+  | "bv_bbl_bvnot" { Token.bv_bbl_bvnot }
+  | "bv_bbl_bvor" { Token.bv_bbl_bvor }
+  | "bv_bbl_bvxor" { Token.bv_bbl_bvxor }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -835,6 +851,14 @@ and scan_block_comment buf locs = parse
         let bv_bbl_eq = BVBBLEQ
         let bv_bbl_neq = BVBBLNEQ
         let bv_bbl_eq_swap = BVBBLEQSWAP
+        let bv_bbl_concat = BVBBLCONCAT
+        let bv_bbl_extract = BVBBLEXTRACT
+        let bv_bbl_zero_extend = BVBBLZEROEXT
+        let bv_bbl_sign_extend = BVBBLSIGNEXT
+        let bv_bbl_bvand = BVBBLBVAND 
+        let bv_bbl_bvnot = BVBBLBVNOT
+        let bv_bbl_bvor = BVBBLBVOR 
+        let bv_bbl_bvxor = BVBBLBVXOR
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
