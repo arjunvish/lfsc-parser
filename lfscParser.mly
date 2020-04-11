@@ -33,7 +33,7 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %token BVEXTRACT BVZEROEXT BVSIGNEXT BVREPEAT BVULT BVULE BVUGT BVUGE BVSLT BVSLE BVSGT BVSGE
 %token BBLTN BBLTC TRUSTBBLASTTERM DECLBBLAST DECLBBLASTWITHALIAS BITOF BVBBLCONST BVBBLVAR INTROASSUMPT INTROASSUMPF
 %token BVBBLEQ BVBBLNEQ BVBBLEQSWAP BVBBLCONCAT BVBBLEXTRACT BVBBLZEROEXT BVBBLSIGNEXT
-%token BVBBLBVAND BVBBLBVNOT BVBBLBVOR BVBBLBVXOR
+%token BVBBLBVAND BVBBLBVNOT BVBBLBVOR BVBBLBVXOR BVBBLBVADD BVBBLBVNEG BVBBLBVMUL
 
 %token HASH_SEMI SC PROGRAM AT MPQ MPZ KIND PI
 
@@ -143,6 +143,12 @@ bblast_term:
   | LPAREN BVBBLBVOR  int_or_hole sorted_term sorted_term bblt bblt bblt bblast_term bblast_term RPAREN
     { "" }
   | LPAREN BVBBLBVXOR int_or_hole sorted_term sorted_term bblt bblt bblt bblast_term bblast_term RPAREN
+    { "" }
+  | LPAREN BVBBLBVADD int_or_hole sorted_term sorted_term bblt bblt bblt bblast_term bblast_term RPAREN
+    { "" }
+  | LPAREN BVBBLBVNEG int_or_hole sorted_term bblt bblt bblast_term RPAREN
+    { "" }
+  | LPAREN BVBBLBVMUL int_or_hole sorted_term sorted_term bblt bblt bblt bblast_term bblast_term RPAREN
     { "" }
   | IDENT { "" }
 ;

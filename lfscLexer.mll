@@ -261,6 +261,9 @@
       val bv_bbl_bvnot : t
       val bv_bbl_bvor : t
       val bv_bbl_bvxor : t
+      val bv_bbl_bvadd : t
+      val bv_bbl_bvneg : t
+      val bv_bbl_bvmul : t
       val rres : t
       val qres : t
       type s = Quoted_string_buffer.t -> Lexing.lexbuf -> t
@@ -492,6 +495,9 @@ rule main buf = parse
   | "bv_bbl_bvnot" { Token.bv_bbl_bvnot }
   | "bv_bbl_bvor" { Token.bv_bbl_bvor }
   | "bv_bbl_bvxor" { Token.bv_bbl_bvxor }
+  | "bv_bbl_bvadd" { Token.bv_bbl_bvadd }
+  | "bv_bbl_bvneg" { Token.bv_bbl_bvneg }
+  | "bv_bbl_bvmul" { Token.bv_bbl_bvmul }
   | 'R' { Token.rres }  
   | 'Q' { Token.qres }
   | '(' '~' (integer as i) ')' {Token.integer ("-"^i) }
@@ -859,6 +865,9 @@ and scan_block_comment buf locs = parse
         let bv_bbl_bvnot = BVBBLBVNOT
         let bv_bbl_bvor = BVBBLBVOR 
         let bv_bbl_bvxor = BVBBLBVXOR
+        let bv_bbl_bvadd = BVBBLBVADD
+        let bv_bbl_bvneg = BVBBLBVNEG
+        let bv_bbl_bvmul = BVBBLBVMUL
         let rres = RRES
         let qres = QRES
         let block_comment _pos ~main buf lexbuf =
