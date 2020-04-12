@@ -4,6 +4,9 @@
 open Lexing
 open Format
 
+(* A hashmap that maps BV variables to their bit-lengths *)
+let var_map = Hashtbl.create 10
+
 let concat_sp_sep_2 a b = "("^a^" "^b^")"
 let concat_sp_sep_3 a b c = "("^a^" "^b^" "^c^")"
 let concat_sp_sep_4 a b c d = "("^a^" "^b^" "^c^" "^d^")"
@@ -157,8 +160,9 @@ bblast_term:
 ;
 
 sorted_bv_term:
-  | LPAREN AVARBV int_or_hole IDENT RPAREN
-    { $4 }
+  | LPAREN AVARBV INT IDENT RPAREN
+    { let _ = (Hashtbl.add var_map $4 $3) in
+      $4 }
   | LPAREN ABV int_or_hole bvconst RPAREN
     { ("#b"^$4) }
   | LPAREN BVAND int_or_hole sorted_term sorted_term RPAREN
@@ -480,8 +484,6 @@ proof_term:
 typed_var:
   | IDENT VAR 
     { "IFUCKEDUP!-typed_var->IDENT VAR" }
-  | IDENT VARBV
-    { (concat_sp_sep_4 "declare-fun" $1 "()" "(_ BitVec )") }
   | IDENT LPAREN TERM fixed_sort RPAREN
     { (concat_sp_sep_4 "declare-fun" $1 "()" $4) }
   | IDENT LPAREN TERM arrow_sort_init RPAREN 
@@ -509,6 +511,12 @@ term:
     { "" }
   | LPAREN BIGLAMBDA typed_var term RPAREN
     { $3^"\n"^$4 }
+  | LPAREN BIGLAMBDA IDENT VARBV term RPAREN
+    { let rest = $5 in
+      let len = (match (Hashtbl.find var_map $3) with 
+      | i -> i
+      | exception Not_found -> 1) in
+      ((concat_sp_sep_5 "declare-fun" $3 "()" "(_ BitVec" (string_of_int(len)^")"))^"\n"^rest) } 
 ;
 
 check_command:

@@ -1,11 +1,18 @@
 (check
  ;; Declarations
-(% v1 var_bv
 (% v0 var_bv
-(% A3 (th_holds true)
-(% A2 (th_holds (= (BitVec 1) (bvcomp 4 (a_var_bv 4 v1) (a_var_bv 4 v0)) (a_bv 1 (bvc b1  bvn))))
-(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
-(% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_bv 4 (bvc b1 (bvc b1 (bvc b1 (bvc b1  bvn)))))))
+(% v1 var_bv
+(% A10 (th_holds true)
+(% A3 (th_holds (bvule 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A2 (th_holds (bvult 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A1 (th_holds (= (BitVec 4) (a_var_bv 4 v1) (a_bv 4 (bvc b1 (bvc b1 (bvc b1 (bvc b1  bvn)))))))
+(% A0 (th_holds (= (BitVec 4) (a_var_bv 4 v0) (a_bv 4 (bvc b0 (bvc b0 (bvc b0 (bvc b0  bvn)))))))
+(% A4 (th_holds (bvugt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A5 (th_holds (bvuge 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A6 (th_holds (bvslt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A7 (th_holds (bvsle 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A8 (th_holds (bvsgt 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
+(% A9 (th_holds (bvsge 4  (a_var_bv 4 v0) (a_var_bv 4 v1)))
 (: (holds cln)
 
  ;; Printing deferred declarations 
@@ -76,5 +83,6 @@
 (satlem_simplify _ _ _ (Q _ _ (Q _ _ (Q _ _ bb.cl60 unit2 bb.v2)unit12 bb.v12)unit22 bb.v22)(\ e e)
 )))))))))))))))( \ .lemc61
 ;; Printing final unsat proof 
-(satlem_simplify _ _ _ (Q _ _ (Q _ _ (Q _ _ .lemc61 .pb6 .v4) .pb5 .v3) .pb4 .v2) (\ empty empty))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+(satlem_simplify _ _ _ (Q _ _ (Q _ _ (Q _ _ .lemc61 .pb6 .v4) .pb5 .v3) .pb4 .v2) (\ empty empty)))))
+))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
 ;;

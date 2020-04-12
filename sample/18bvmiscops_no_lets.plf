@@ -1,4 +1,3 @@
-unsat
 (check
  ;; Declarations
 (% v3 var_bv

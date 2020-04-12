@@ -1,13 +1,5 @@
-(set-logic QF_BV)
-(set-info :smt-lib-version 2.0)
-(set-info :category "crafted")
-(set-info :status unsat)
-(declare-fun v0 () (_ BitVec 4))
-(declare-fun v1 () (_ BitVec 4))
-
-(assert (= v0 #b1111))
-(assert (= v1 #b0000))
-(assert (= (bvcomp v1 v0) #b1))
-
+(set-logic ALL_SUPPORTED)
+(declare-fun x () (_ BitVec 8))
+(assert true)
+(assert (not (= (bvudiv x #b00000000) #b11111111)))
 (check-sat)
-(exit)
