@@ -1,5 +1,4 @@
 (set-logic ALL_SUPPORTED)
-(declare-fun x () (_ BitVec 8))
-(assert true)
-(assert (not (= (bvudiv x #b00000000) #b11111111)))
+(define-fun f ((x Bool)) Bool (not x))
+(assert (= (f true) (f false)))
 (check-sat)
