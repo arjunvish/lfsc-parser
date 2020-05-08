@@ -3,6 +3,7 @@
 
 open Lexing
 open Format
+open LfscAst
 
 (* A hashmap that maps BV variables to their bit-lengths *)
 let var_map = Hashtbl.create 10
@@ -45,85 +46,11 @@ let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^
 %type <unit> command
 %%
 
-lit:
-  | LPAREN POS IDENT RPAREN
-    { concat_sp_sep_2 "lit.pos" ($3) }
-  | LPAREN NEG IDENT RPAREN
-    { concat_sp_sep_2 "lit.neg" ($3) }
-;
-
-clause:
-  | CLN { "[]" }
-  | LPAREN CLC lit clause RPAREN
-    { ($3^" :: "^$4) }
-  | LPAREN CONCAT_CL clause clause RPAREN
-    { ("concat_cl "^$3^" "^$4) }
-  | LPAREN CLR lit clause RPAREN
-    { ("clr "^$3^" "^$4) }
-  | HOLE { "" }
-  | IDENT { "" }
-;
-
-cnf:
-  | CNFN { "[]" }
-  | LPAREN CNFC clause cnf RPAREN
-    { ("("^$3^") :: ("^$4^")") }
-  | HOLE { "" }
-;
-
-fixed_sort:
-  | BOOL { "Bool" }
-  | LPAREN ARRAY sort sort RPAREN 
-    { (concat_sp_sep_3 "Array" $3 $4) }
-  | LPAREN BITVEC INT RPAREN
-    { (concat_sp_sep_3 "_" "BitVec" (string_of_int($3))) }
-  | IDENT { $1 }
-;
-
-arrow_sort_rec:
-  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
-    { (" "^$3^$4) }
-  | fixed_sort { (") "^$1) }
-;
-
-arrow_sort_init:
-  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
-    { ("("^$3^$4) }
-;
-
-sort:
-  | fixed_sort { $1 }
-  | arrow_sort_init { $1 }
-  | HOLE { "" }
-;
-
-apply_rec:
-  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
-    { ($5^" "^$6) }
-  | sorted_term_without_apply { $1 }
-;
-
-apply_init:
-  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
-    { ("("^$5^" "^$6^")")}
-;
-
-bvconst:
-  | LPAREN BVC B0 bvconst RPAREN { ("0"^$4) }
-  | LPAREN BVC B1 bvconst RPAREN { ("1"^$4) }
-  | BVN { "" }
-;
-
 bblt:
   | BBLTN { "" }
   | LPAREN BBLTC formula bblt RPAREN { "" }
   | HOLE { "" }
   | IDENT { "" }
-;
-
-int_or_hole:
-  | INT { string_of_int($1) }
-  | HOLE { "" }
 ;
 
 bblast_term:
@@ -157,163 +84,6 @@ bblast_term:
   | LPAREN BVBBLBVCOMP int_or_hole sorted_term sorted_term bblt bblt bblt bblast_term bblast_term RPAREN
     { "" }
   | IDENT { "" }
-;
-
-sorted_bv_term:
-  | LPAREN AVARBV INT IDENT RPAREN
-    { let _ = (Hashtbl.add var_map $4 $3) in
-      $4 }
-  | LPAREN ABV int_or_hole bvconst RPAREN
-    { ("#b"^$4) }
-  | LPAREN BVAND int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvand" $4 $5) }
-  | LPAREN BVOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvor" $4 $5) }
-  | LPAREN BVXOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvxor" $4 $5) }
-  | LPAREN BVNAND int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvnand" $4 $5) }
-  | LPAREN BVNOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvnor" $4 $5) }
-  | LPAREN BVXNOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvxnor" $4 $5) }
-  | LPAREN BVMUL int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvmul" $4 $5) }
-  | LPAREN BVADD int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvadd" $4 $5) }
-  | LPAREN BVSUB int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsub" $4 $5) }
-  | LPAREN BVUDIV int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvudiv" $4 $5) }
-  | LPAREN BVUREM int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvurem" $4 $5) }
-  | LPAREN BVSDIV int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsdiv" $4 $5) }
-  | LPAREN BVSREM int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsrem" $4 $5) }
-  | LPAREN BVSMOD int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsmod" $4 $5) }
-  | LPAREN BVSHL int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvshl" $4 $5) }
-  | LPAREN BVLSHR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvlshr" $4 $5) }
-  | LPAREN BVASHR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvashr" $4 $5) }
-  | LPAREN BVCONCAT int_or_hole int_or_hole int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "concat" $6 $7) }
-  | LPAREN BVNEG int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 "bvneg" $4) }
-  | LPAREN BVNOT int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 "bvnot" $4) }
-  | LPAREN BVLROTATE int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_left" $3) 
-                       $4) }
-  | LPAREN BVRROTATE int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_right" $3) 
-                       $4) }
-  | LPAREN BVCOMP int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvcomp" $4 $5) }
-  | LPAREN BVEXTRACT int_or_hole int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_4 "_" "extract" $4 $5)
-                       $7) }
-  | LPAREN BVZEROEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "zero_extend" $4)
-                       $6) }
-  | LPAREN BVSIGNEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "sign_extend" $4)
-                       $6) }
-  | LPAREN BVREPEAT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "repeat" $4)
-                       $6) }
-;
-
-sorted_term_without_apply:
-  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
-    { concat_sp_sep_4 "ite" $4 $5 $6 }
-  | T_TRUE { "true" }
-  | T_FALSE { "false" }
-  | LPAREN F_TO_B formula RPAREN
-    { $3 }
-  | LPAREN WRITE sort sort RPAREN 
-    { "store" }
-  | LPAREN READ sort sort RPAREN 
-    { "select" }
-  | sorted_bv_term { $1 }  
-  | IDENT { ($1) }
-  | HOLE 
-    { ("IFUCKEDUP!-sorted_term->HOLE") }
-;
-
-sorted_term:
-  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
-    { concat_sp_sep_4 "ite" $4 $5 $6 }
-  | T_TRUE { "true" }
-  | T_FALSE { "false" }
-  | LPAREN F_TO_B formula RPAREN
-    { $3 }
-  | apply_init { $1 }
-  | LPAREN WRITE sort sort RPAREN 
-    { "store" }
-  | LPAREN READ sort sort RPAREN 
-    { "select" }   
-  | IDENT { ($1) }
-  | sorted_bv_term { $1 }   
-  | HOLE 
-    { ("IFUCKEDUP!-sorted_term->HOLE") }
-;
-
-formula:
-  | TRUE { "true" }
-  | FALSE { "false" }
-  | LPAREN NOT formula RPAREN 
-    { (concat_sp_sep_2 "not" $3) }
-  | LPAREN AND formula formula RPAREN
-    { (concat_sp_sep_3 "and" $3 $4) }
-  | LPAREN OR formula formula RPAREN
-    { (concat_sp_sep_3 "or" $3 $4) }
-  | LPAREN IMPL formula formula RPAREN
-    { (concat_sp_sep_3 "=>" $3 $4) }
-  | LPAREN IFF formula formula RPAREN
-    { (concat_sp_sep_3 "=" $3 $4) }
-  | LPAREN XOR formula formula RPAREN
-    { (concat_sp_sep_3 "xor" $3 $4) }
-  | LPAREN IFTE formula formula formula RPAREN
-    { (concat_sp_sep_4 "ite" $3 $4 $5) }
-  | LPAREN EQUALS sort sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "=" $4 $5) }
-  | LPAREN P_APP sorted_term RPAREN { $3 }
-  | LPAREN BVULT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvult" $4 $5) }
-  | LPAREN BVULE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvule" $4 $5) }
-  | LPAREN BVUGT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvugt" $4 $5) }
-  | LPAREN BVUGE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvuge" $4 $5) }
-  | LPAREN BVSLT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvslt" $4 $5) }
-  | LPAREN BVSLE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsle" $4 $5) }
-  | LPAREN BVSGT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsgt" $4 $5) }
-  | LPAREN BVSGE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsge" $4 $5) }
-  | LPAREN BITOF sorted_term int_or_hole RPAREN { "" }
-  | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!-formula->LET" }
-  | FLET formula LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!-formula->FLET" }
-  | HOLE { "" }
-;
-
-holds_term:
-  | LPAREN HOLDS clause RPAREN
-    { ("holds ("^$3^")") }
-  | LPAREN CNF_HOLDS cnf RPAREN
-    { ("cnf_holds ("^$3^")") }
-  | LPAREN TH_HOLDS formula RPAREN
-    { ($3) }
-  | IDENT { $1 }
 ;
 
 proof_term:
@@ -481,6 +251,250 @@ proof_term:
   | IDENT { (" "^$1^" ") }
 ;
 
+lit:
+  | LPAREN POS IDENT RPAREN
+    { concat_sp_sep_2 "lit.pos" ($3) }
+  | LPAREN NEG IDENT RPAREN
+    { concat_sp_sep_2 "lit.neg" ($3) }
+;
+
+clause:
+  | CLN { "[]" }
+  | LPAREN CLC lit clause RPAREN
+    { ($3^" :: "^$4) }
+  | LPAREN CONCAT_CL clause clause RPAREN
+    { ("concat_cl "^$3^" "^$4) }
+  | LPAREN CLR lit clause RPAREN
+    { ("clr "^$3^" "^$4) }
+  | HOLE { "" }
+  | IDENT { "" }
+;
+
+cnf:
+  | CNFN { "[]" }
+  | LPAREN CNFC clause cnf RPAREN
+    { ("("^$3^") :: ("^$4^")") }
+  | HOLE { "" }
+;
+
+fixed_sort:
+  | BOOL { "Bool" }
+  | LPAREN ARRAY sort sort RPAREN 
+    { (concat_sp_sep_3 "Array" $3 $4) }
+  | LPAREN BITVEC INT RPAREN
+    { (concat_sp_sep_3 "_" "BitVec" (string_of_int($3))) }
+  | IDENT { $1 }
+;
+
+arrow_sort_rec:
+  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
+    { (" "^$3^$4) }
+  | fixed_sort { (") "^$1) }
+;
+
+arrow_sort_init:
+  | LPAREN ARROW fixed_sort arrow_sort_rec RPAREN
+    { ("("^$3^$4) }
+;
+
+sort:
+  | fixed_sort { $1 }
+  | arrow_sort_init { $1 }
+  | HOLE { "" }
+;
+
+apply_rec:
+  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
+    { ($5^" "^$6) }
+  | sorted_term_without_apply { $1 }
+;
+
+apply_init:
+  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
+    { ("("^$5^" "^$6^")")}
+;
+
+bvconst:
+  | LPAREN BVC B0 bvconst RPAREN { ("0"^$4) }
+  | LPAREN BVC B1 bvconst RPAREN { ("1"^$4) }
+  | BVN { "" }
+;
+
+int_or_hole:
+  | INT { string_of_int($1) }
+  | HOLE { "" }
+;
+
+sorted_bv_term:
+  | LPAREN AVARBV INT IDENT RPAREN
+    { let _ = (Hashtbl.add var_map $4 $3) in
+      $4 }
+  | LPAREN ABV int_or_hole bvconst RPAREN
+    { ("#b"^$4) }
+  | LPAREN BVAND int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvand" $4 $5) }
+  | LPAREN BVOR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvor" $4 $5) }
+  | LPAREN BVXOR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxor" $4 $5) }
+  | LPAREN BVNAND int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnand" $4 $5) }
+  | LPAREN BVNOR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvnor" $4 $5) }
+  | LPAREN BVXNOR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvxnor" $4 $5) }
+  | LPAREN BVMUL int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvmul" $4 $5) }
+  | LPAREN BVADD int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvadd" $4 $5) }
+  | LPAREN BVSUB int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsub" $4 $5) }
+  | LPAREN BVUDIV int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvudiv" $4 $5) }
+  | LPAREN BVUREM int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvurem" $4 $5) }
+  | LPAREN BVSDIV int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsdiv" $4 $5) }
+  | LPAREN BVSREM int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsrem" $4 $5) }
+  | LPAREN BVSMOD int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsmod" $4 $5) }
+  | LPAREN BVSHL int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvshl" $4 $5) }
+  | LPAREN BVLSHR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvlshr" $4 $5) }
+  | LPAREN BVASHR int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvashr" $4 $5) }
+  | LPAREN BVCONCAT int_or_hole int_or_hole int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "concat" $6 $7) }
+  | LPAREN BVNEG int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 "bvneg" $4) }
+  | LPAREN BVNOT int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 "bvnot" $4) }
+  | LPAREN BVLROTATE int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_left" $3) 
+                       $4) }
+  | LPAREN BVRROTATE int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_right" $3) 
+                       $4) }
+  | LPAREN BVCOMP int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvcomp" $4 $5) }
+  | LPAREN BVEXTRACT int_or_hole int_or_hole int_or_hole int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_4 "_" "extract" $4 $5)
+                       $7) }
+  | LPAREN BVZEROEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "zero_extend" $4)
+                       $6) }
+  | LPAREN BVSIGNEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "sign_extend" $4)
+                       $6) }
+  | LPAREN BVREPEAT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
+    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "repeat" $4)
+                       $6) }
+;
+
+sorted_term_without_apply:
+  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
+    { concat_sp_sep_4 "ite" $4 $5 $6 }
+  | T_TRUE { "true" }
+  | T_FALSE { "false" }
+  | LPAREN F_TO_B formula RPAREN
+    { $3 }
+  | LPAREN WRITE sort sort RPAREN 
+    { "store" }
+  | LPAREN READ sort sort RPAREN 
+    { "select" }
+  | sorted_bv_term { $1 }  
+  | IDENT { ($1) }
+  | HOLE 
+    { ("IFUCKEDUP!-sorted_term->HOLE") }
+;
+
+sorted_term:
+  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
+    { concat_sp_sep_4 "ite" $4 $5 $6 }
+  | T_TRUE { "true" }
+  | T_FALSE { "false" }
+  | LPAREN F_TO_B formula RPAREN
+    { $3 }
+  | apply_init { $1 }
+  | LPAREN WRITE sort sort RPAREN 
+    { "store" }
+  | LPAREN READ sort sort RPAREN 
+    { "select" }   
+  | IDENT { ($1) }
+  | sorted_bv_term { $1 }   
+  | HOLE 
+    { ("IFUCKEDUP!-sorted_term->HOLE") }
+;
+
+formula:
+  | TRUE 
+    (*{ True }*)
+    { "true" }
+  | FALSE 
+  (*{ False }*)
+    { "false" }
+  | LPAREN NOT f=formula RPAREN 
+    (*{ Not f }*)
+    { (concat_sp_sep_2 "not" f) }
+  | LPAREN AND f1=formula f2=formula RPAREN
+    (*{ And (f1,f2) }*)
+    { (concat_sp_sep_3 "and" f1 f2) }
+  | LPAREN OR f1=formula f2=formula RPAREN
+    (*{ Or (f1,f2) }*)
+    { (concat_sp_sep_3 "or" f1 f2) }
+  | LPAREN IMPL f1=formula f2=formula RPAREN
+    (*{ Impl (f1,f2) }*)
+    { (concat_sp_sep_3 "=>" f1 f2) }
+  | LPAREN IFF f1=formula f2=formula RPAREN
+    (*{ Iff (f1,f2) }*)
+    { (concat_sp_sep_3 "=" f1 f2) }
+  | LPAREN XOR f1=formula f2=formula RPAREN
+    (*{ Xor (f1,f2) }*)
+    { (concat_sp_sep_3 "xor" f1 f2) }
+  | LPAREN IFTE formula formula formula RPAREN
+    { (concat_sp_sep_4 "ite" $3 $4 $5) }
+  | LPAREN EQUALS sort sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "=" $4 $5) }
+  | LPAREN P_APP sorted_term RPAREN { $3 }
+  | LPAREN BVULT int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvult" $4 $5) }
+  | LPAREN BVULE int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvule" $4 $5) }
+  | LPAREN BVUGT int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvugt" $4 $5) }
+  | LPAREN BVUGE int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvuge" $4 $5) }
+  | LPAREN BVSLT int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvslt" $4 $5) }
+  | LPAREN BVSLE int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsle" $4 $5) }
+  | LPAREN BVSGT int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsgt" $4 $5) }
+  | LPAREN BVSGE int_or_hole sorted_term sorted_term RPAREN
+    { (concat_sp_sep_3 "bvsge" $4 $5) }
+  | LPAREN BITOF sorted_term int_or_hole RPAREN { "" }
+  | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
+    { "IFUCKEDUP!-formula->LET" }
+  | FLET formula LPAREN LAMBDA IDENT formula RPAREN
+    { "IFUCKEDUP!-formula->FLET" }
+  | HOLE { "" }
+;
+
+holds_term:
+  | LPAREN HOLDS clause RPAREN
+    (*{ (Error "holds_term -> HOLDS clause") }*)
+    { ("holds ("^$3^")") }
+  | LPAREN CNF_HOLDS cnf RPAREN
+    (*{ (Error "holds_term -> CNF_HOLDS cnf") }*)
+    { ("cnf_holds ("^$3^")") }
+  | LPAREN TH_HOLDS formula RPAREN
+    { ($3) }
+  | IDENT { $1 }
+    (*NOTSURE*)
+;
+
 typed_var:
   | IDENT VAR 
     { "IFUCKEDUP!-typed_var->IDENT VAR" }
@@ -491,6 +505,7 @@ typed_var:
   | IDENT SORT 
     { (concat_sp_sep_3 "declare-sort" $1 "0") }
   | IDENT holds_term 
+    (*{ (concat_sp_sep_2 "assert" (to_string_form $2)) }*)
     { (concat_sp_sep_2 "assert" $2) }
 ;
 

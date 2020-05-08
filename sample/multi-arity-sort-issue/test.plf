@@ -1,6 +1,8 @@
+;(declare Array (! s1 sort (! s2 sort sort)))
+(declare I (! s2 sort sort))
 (check
  ;; Declarations
-(% (I Bool) sort
+;(% (I Bool) sort
 (% y (term (I Bool))
 (% x (term (I Bool))
 (% A2 (th_holds true)
@@ -35,6 +37,6 @@
  ;; Bit-blasting learned clauses 
 
 ;; Printing final unsat proof 
-(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty)))))))))))))))))))))
+(satlem_simplify _ _ _ (Q _ _ .pb5 .pb4 .v2) (\ empty empty))))))))))))))))))))
 ;;
 
