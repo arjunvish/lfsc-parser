@@ -15,6 +15,30 @@ let concat_sp_sep_5 a b c d e = "("^a^" "^b^" "^c^" "^d^" "^e^")"
 let concat_sp_sep_6 a b c d e f = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^")"
 let concat_sp_sep_7 a b c d e f g = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^")"
 let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^" "^h^")"
+
+let rec form_to_sterm f = 
+match f with
+  | Var v -> SVar v
+  | True -> STrue
+  | False -> SFalse
+  | Not f -> SNot f
+  | And (f1,f2) -> SAnd (f1,f2)
+  | Or (f1,f2) -> SOr (f1,f2)
+  | Impl (f1,f2) -> SImpl (f1,f2)
+  | Xor (f1,f2) -> SXor (f1,f2)
+  | Eq (f1,f2) -> SEq (f1,f2)
+  | Ite (f1,f2,f3) -> let s2 = form_to_sterm f2 in
+                      let s3 = form_to_sterm f3 in
+                      SIte (f1,s2,s3)
+  | Bvult (s1,s2) -> SBvult (s1,s2)
+  | Bvule (s1,s2) -> SBvule (s1,s2)
+  | Bvugt (s1,s2) -> SBvugt (s1,s2)
+  | Bvuge (s1,s2) -> SBvuge (s1,s2)
+  | Bvslt (s1,s2) -> SBvslt (s1,s2)
+  | Bvsle (s1,s2) -> SBvsle (s1,s2)
+  | Bvsgt (s1,s2) -> SBvsgt (s1,s2)
+  | Bvsge (s1,s2) -> SBvsge (s1,s2)
+  | Error s -> SError s
 %}
 
 %token <string> IDENT
@@ -87,168 +111,90 @@ bblast_term:
 ;
 
 proof_term:
-  | LPAREN SATLEM clause clause proof_term proof_term RPAREN
-    { "(satlem "^$3^$4^$5^" "^$6^")" }
-  | LPAREN SATLEM_SIMPLIFY clause clause clause proof_term proof_term RPAREN
-    { "(satlem_simplify "^$3^$4^$5^$6^" \n"^" _ "^$7^")" }
-  | LPAREN RRES clause clause proof_term proof_term IDENT RPAREN
-    { "(R "^$3^$4^$5^" "^$6^" "^$7^")" }
-  | LPAREN QRES clause clause proof_term proof_term IDENT RPAREN
-    { "(Q "^$3^$4^$5^" "^$6^" "^$7^")" }
-  | LPAREN LAMBDA IDENT proof_term RPAREN { "(fun "^$3^",\n   "^$4^")" }
-  | CNFN_PROOF { "cnfn_proof" }
-  | LPAREN CNFC_PROOF clause clause cnf proof_term proof_term RPAREN
-    { "(cnfc_proof \n"^$3^$4^$5^" "^$6^" "^$7^")" }
-  | T_T_NEQ_F { "t_t_neq_f" }
-  | LPAREN PRED_EQ_T sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_eq_t" $3 $4 }
-  | LPAREN PRED_EQ_F sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_eq_f" $3 $4 }
-  | LPAREN TRUE_PREDS_EQUAL sorted_term sorted_term holds_term holds_term RPAREN
-    { concat_sp_sep_5 "true_preds_equal" $3 $4 $5 $6 }
-  | LPAREN FALSE_PREDS_EQUAL sorted_term sorted_term holds_term holds_term RPAREN
-    { concat_sp_sep_5 "false_preds_equal" $3 $4 $5 $6 }
-  | LPAREN PRED_REFL_POS sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_refl_pos" $3 $4 }
-  | LPAREN PRED_REFL_NEG sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_refl_neg" $3 $4 }
-  | LPAREN PRED_NOT_IFF_F sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_not_iff_f" $3 $4 }
-  | LPAREN PRED_NOT_IFF_F_2 sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_not_iff_f_2" $3 $4 }
-  | LPAREN PRED_NOT_IFF_T sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_not_iff_t" $3 $4 }
-  | LPAREN PRED_NOT_IFF_T_2 sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_not_iff_t_2" $3 $4 }
-  | LPAREN PRED_IFF_F sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_iff_f" $3 $4 }
-  | LPAREN PRED_IFF_F_2 sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_iff_f_2" $3 $4 }
-  | LPAREN PRED_IFF_T sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_iff_t" $3 $4 }
-  | LPAREN PRED_IFF_T_2 sorted_term holds_term RPAREN
-    { concat_sp_sep_3 "pred_iff_t_2" $3 $4 }
-  | LPAREN DECL_ATOM formula proof_term RPAREN
-    { concat_sp_sep_3 "decl_atom" $3 $4 }
-  | LPAREN DECL_BVATOM formula proof_term RPAREN
-    { concat_sp_sep_3 "decl_bv_atom" $3 $4 }
-  | LPAREN CLAUSIFY_FORM formula proof_term proof_term proof_term RPAREN
-    { concat_sp_sep_5 "clausify_form" $3 $4 $5 $6 }
-  | LPAREN CLAUSIFY_FORM_NOT formula proof_term proof_term proof_term RPAREN
-    { concat_sp_sep_5 "clausify_form_not" $3 $4 $5 $6 }
-  | LPAREN CLAUSIFY_FALSE proof_term RPAREN
-    { concat_sp_sep_2 "clausify_false" $3 }
-  | LPAREN TH_LET_PF formula proof_term proof_term RPAREN
-    { concat_sp_sep_4 "th_let_pf" $3 $4 $5 }
-  | LPAREN IFF_SYMM formula RPAREN
-    { concat_sp_sep_2 "iff_symm" $3 }
-  | LPAREN CONTRAD formula proof_term proof_term RPAREN
-    { concat_sp_sep_4 "contra" $3 $4 $5 }
-  | TRUTH { "truth" }
-  | LPAREN NOT_NOT_INTRO formula proof_term RPAREN
-    { concat_sp_sep_3 "not_not_intro" $3 $4 }
-  | LPAREN NOT_NOT_ELIM formula proof_term RPAREN
-    { concat_sp_sep_3 "not_not_elim" $3 $4 }
-  | LPAREN OR_ELIM_1 formula formula proof_term proof_term RPAREN
-    { concat_sp_sep_3 "or_elim_1" $5 $6 }
-  | LPAREN OR_ELIM_2 formula formula proof_term proof_term RPAREN
-    { concat_sp_sep_3 "or_elim_2" $5 $6 }
-  | LPAREN NOT_OR_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_or_elim" $5 }
-  | LPAREN AND_ELIM_1 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "and_elim_1" $5 }
-  | LPAREN AND_ELIM_2 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "and_elim_2" $5 }
-  | LPAREN NOT_AND_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_and_elim" $5 }
-  | LPAREN IMPL_INTRO formula formula proof_term RPAREN
-    { concat_sp_sep_2 "impl_intro" $5 }
-  | LPAREN IMPL_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "impl_elim" $5 }
-  | LPAREN NOT_IMPL_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_impl_elim" $5 }
-  | LPAREN IFF_ELIM_1 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "iff_elim_1" $5 }
-  | LPAREN IFF_ELIM_2 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "iff_elim_2" $5 }
-  | LPAREN NOT_IFF_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_iff_elim" $5 }
-  | LPAREN XOR_ELIM_1 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "xor_elim_1" $5 }
-  | LPAREN XOR_ELIM_2 formula formula proof_term RPAREN
-    { concat_sp_sep_2 "xor_elim_2" $5 }
-  | LPAREN NOT_XOR_ELIM formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_xor_elim" $5 }
-  | LPAREN ITE_ELIM_1 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "ite_elim_1" $6 }
-  | LPAREN ITE_ELIM_2 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "ite_elim_2" $6 }
-  | LPAREN ITE_ELIM_3 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "ite_elim_3" $6 }
-  | LPAREN NOT_ITE_ELIM_1 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_ite_elim_1" $6 }
-  | LPAREN NOT_ITE_ELIM_2 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_ite_elim_2" $6 }
-  | LPAREN NOT_ITE_ELIM_3 formula formula formula proof_term RPAREN
-    { concat_sp_sep_2 "not_ite_elim_3" $6 }
-  | LPAREN AST proof_term formula clause proof_term proof_term RPAREN
-    { concat_sp_sep_6 "ast" $3 $4 $5 $6 $7 }
-  | LPAREN ASF proof_term formula clause proof_term proof_term RPAREN
-    { concat_sp_sep_6 "asf" $3 $4 $5 $6 $7 }
-  | LPAREN BV_ASF proof_term proof_term formula clause proof_term proof_term proof_term RPAREN
-    { concat_sp_sep_8 "bv_asf" $3 $4 $5 $6 $7 $8 $9 }
-  | LPAREN BV_AST proof_term proof_term formula clause proof_term proof_term proof_term RPAREN
-    { concat_sp_sep_8 "bv_ast" $3 $4 $5 $6 $7 $8 $9 }
-  | TRUST { "trust" }
-  | LPAREN TRUST_F formula RPAREN
-    { concat_sp_sep_2 "trust_f" $3 }
+  | LPAREN SATLEM clause clause proof_term proof_term RPAREN { "" }
+  | LPAREN SATLEM_SIMPLIFY clause clause clause proof_term proof_term RPAREN { "" }
+  | LPAREN RRES clause clause proof_term proof_term IDENT RPAREN { "" }
+  | LPAREN QRES clause clause proof_term proof_term IDENT RPAREN { "" }
+  | LPAREN LAMBDA IDENT proof_term RPAREN { "" }
+  | CNFN_PROOF { "" }
+  | LPAREN CNFC_PROOF clause clause cnf proof_term proof_term RPAREN { "" }
+  | T_T_NEQ_F { "" }
+  | LPAREN PRED_EQ_T sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_EQ_F sorted_term holds_formula RPAREN { "" }
+  | LPAREN TRUE_PREDS_EQUAL sorted_term sorted_term holds_formula holds_formula RPAREN { "" }
+  | LPAREN FALSE_PREDS_EQUAL sorted_term sorted_term holds_formula holds_formula RPAREN { "" }
+  | LPAREN PRED_REFL_POS sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_REFL_NEG sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_NOT_IFF_F sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_NOT_IFF_F_2 sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_NOT_IFF_T sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_NOT_IFF_T_2 sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_IFF_F sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_IFF_F_2 sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_IFF_T sorted_term holds_formula RPAREN { "" }
+  | LPAREN PRED_IFF_T_2 sorted_term holds_formula RPAREN { "" }
+  | LPAREN DECL_ATOM formula proof_term RPAREN { "" }
+  | LPAREN DECL_BVATOM formula proof_term RPAREN { "" }
+  | LPAREN CLAUSIFY_FORM formula proof_term proof_term proof_term RPAREN { "" }
+  | LPAREN CLAUSIFY_FORM_NOT formula proof_term proof_term proof_term RPAREN { "" }
+  | LPAREN CLAUSIFY_FALSE proof_term RPAREN { "" }
+  | LPAREN TH_LET_PF formula proof_term proof_term RPAREN { "" }
+  | LPAREN IFF_SYMM formula RPAREN { "" }
+  | LPAREN CONTRAD formula proof_term proof_term RPAREN { "" }
+  | TRUTH { "" }
+  | LPAREN NOT_NOT_INTRO formula proof_term RPAREN { "" }
+  | LPAREN NOT_NOT_ELIM formula proof_term RPAREN { "" }
+  | LPAREN OR_ELIM_1 formula formula proof_term proof_term RPAREN { "" }
+  | LPAREN OR_ELIM_2 formula formula proof_term proof_term RPAREN { "" }
+  | LPAREN NOT_OR_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN AND_ELIM_1 formula formula proof_term RPAREN { "" }
+  | LPAREN AND_ELIM_2 formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_AND_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN IMPL_INTRO formula formula proof_term RPAREN { "" }
+  | LPAREN IMPL_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_IMPL_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN IFF_ELIM_1 formula formula proof_term RPAREN { "" }
+  | LPAREN IFF_ELIM_2 formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_IFF_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN XOR_ELIM_1 formula formula proof_term RPAREN { "" }
+  | LPAREN XOR_ELIM_2 formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_XOR_ELIM formula formula proof_term RPAREN { "" }
+  | LPAREN ITE_ELIM_1 formula formula formula proof_term RPAREN { "" }
+  | LPAREN ITE_ELIM_2 formula formula formula proof_term RPAREN { "" }
+  | LPAREN ITE_ELIM_3 formula formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_ITE_ELIM_1 formula formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_ITE_ELIM_2 formula formula formula proof_term RPAREN { "" }
+  | LPAREN NOT_ITE_ELIM_3 formula formula formula proof_term RPAREN { "" }
+  | LPAREN AST proof_term formula clause proof_term proof_term RPAREN { "" }
+  | LPAREN ASF proof_term formula clause proof_term proof_term RPAREN { "" }
+  | LPAREN BV_ASF proof_term proof_term formula clause proof_term proof_term proof_term RPAREN { "" }
+  | LPAREN BV_AST proof_term proof_term formula clause proof_term proof_term proof_term RPAREN { "" }
+  | TRUST { "" }
+  | LPAREN TRUST_F formula RPAREN { "" }
   | LPAREN REFL sort sorted_term RPAREN
-    { concat_sp_sep_2 "refl" $4 }
-  | LPAREN SYMM sort sorted_term sorted_term proof_term RPAREN
-    { concat_sp_sep_2 "symm" $6 }
-  | LPAREN TRANS sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN
-    { concat_sp_sep_3 "trans" $7 $8 }
-  | LPAREN NEGSYMM sort sorted_term sorted_term proof_term RPAREN
-    { concat_sp_sep_2 "negsymm" $6 }
-  | LPAREN NEGTRANS1 sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN
-    { concat_sp_sep_3 "negtrans1" $7 $8 }
-  | LPAREN NEGTRANS2 sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN
-    { concat_sp_sep_3 "negtrans2" $7 $8 }
-  | LPAREN CONG sort sort sorted_term sorted_term sorted_term sorted_term proof_term proof_term RPAREN
-    { concat_sp_sep_3 "cong" $9 $10 }
-  /*Producing empty output from here on since we don't need output for proof body*/
-  | LPAREN ROW1 sort sort sorted_term sorted_term sorted_term RPAREN
-    { "" }
-  | LPAREN ROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN
-    { "" }
-  | LPAREN NEGATIVEROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN
-    { "" }
-  | LPAREN EXT sort sort sorted_term sorted_term proof_term RPAREN
-    { "" }
-  | TRUSTBAD
-    { "" }
-  | LPAREN BVDISEQ int_or_hole bvconst bvconst RPAREN
-    { "" }
-  | LPAREN DECLBBLAST int_or_hole bblt sorted_term bblast_term proof_term RPAREN
-    { "" }
-  | LPAREN DECLBBLASTWITHALIAS int_or_hole bblt sorted_term sorted_term bblast_term proof_term proof_term RPAREN
-    { "" }
-  | LPAREN INTROASSUMPT formula proof_term clause proof_term proof_term proof_term RPAREN
-    { "" }
-  | LPAREN INTROASSUMPF formula proof_term clause proof_term proof_term proof_term RPAREN
-    { "" }
-  | LPAREN BVBBLEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
-    { "" }
-  | LPAREN BVBBLNEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
-    { "" }
-  | LPAREN BVBBLEQSWAP int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
-    { "" }
-  | LPAREN BVBBLBVULT int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
-    { "" }
-  | LPAREN BVBBLBVSLT int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN
-    { "" }
+  | LPAREN SYMM sort sorted_term sorted_term proof_term RPAREN { "" }
+  | LPAREN TRANS sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN { "" }
+  | LPAREN NEGSYMM sort sorted_term sorted_term proof_term RPAREN { "" }
+  | LPAREN NEGTRANS1 sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN { "" }
+  | LPAREN NEGTRANS2 sort sorted_term sorted_term sorted_term proof_term proof_term RPAREN { "" }
+  | LPAREN CONG sort sort sorted_term sorted_term sorted_term sorted_term proof_term proof_term RPAREN { "" }
+  | LPAREN ROW1 sort sort sorted_term sorted_term sorted_term RPAREN { "" }
+  | LPAREN ROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN { "" }
+  | LPAREN NEGATIVEROW sort sort sorted_term sorted_term sorted_term sorted_term proof_term RPAREN { "" }
+  | LPAREN EXT sort sort sorted_term sorted_term proof_term RPAREN { "" }
+  | TRUSTBAD { "" }
+  | LPAREN BVDISEQ int_or_hole bvconst bvconst RPAREN { "" }
+  | LPAREN DECLBBLAST int_or_hole bblt sorted_term bblast_term proof_term RPAREN { "" }
+  | LPAREN DECLBBLASTWITHALIAS int_or_hole bblt sorted_term sorted_term bblast_term proof_term proof_term RPAREN { "" }
+  | LPAREN INTROASSUMPT formula proof_term clause proof_term proof_term proof_term RPAREN { "" }
+  | LPAREN INTROASSUMPF formula proof_term clause proof_term proof_term proof_term RPAREN { "" }
+  | LPAREN BVBBLEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN { "" }
+  | LPAREN BVBBLNEQ int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN { "" }
+  | LPAREN BVBBLEQSWAP int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN { "" }
+  | LPAREN BVBBLBVULT int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN { "" }
+  | LPAREN BVBBLBVSLT int_or_hole sorted_term sorted_term bblt bblt formula bblast_term bblast_term RPAREN { "" }
   | HOLE { "" }
-  | IDENT { (" "^$1^" ") }
+  | IDENT { "" }
 ;
 
 lit:
@@ -303,17 +249,6 @@ sort:
   | HOLE { "" }
 ;
 
-apply_rec:
-  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
-    { ($5^" "^$6) }
-  | sorted_term_without_apply { $1 }
-;
-
-apply_init:
-  | LPAREN APPLY sort sort apply_rec sorted_term RPAREN
-    { ("("^$5^" "^$6^")")}
-;
-
 bvconst:
   | LPAREN BVC B0 bvconst RPAREN { ("0"^$4) }
   | LPAREN BVC B1 bvconst RPAREN { ("1"^$4) }
@@ -328,198 +263,190 @@ int_or_hole:
 sorted_bv_term:
   | LPAREN AVARBV INT IDENT RPAREN
     { let _ = (Hashtbl.add var_map $4 $3) in
-      $4 }
+      SVar $4 }
   | LPAREN ABV int_or_hole bvconst RPAREN
-    { ("#b"^$4) }
-  | LPAREN BVAND int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvand" $4 $5) }
-  | LPAREN BVOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvor" $4 $5) }
-  | LPAREN BVXOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvxor" $4 $5) }
-  | LPAREN BVNAND int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvnand" $4 $5) }
-  | LPAREN BVNOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvnor" $4 $5) }
-  | LPAREN BVXNOR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvxnor" $4 $5) }
-  | LPAREN BVMUL int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvmul" $4 $5) }
-  | LPAREN BVADD int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvadd" $4 $5) }
-  | LPAREN BVSUB int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsub" $4 $5) }
-  | LPAREN BVUDIV int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvudiv" $4 $5) }
-  | LPAREN BVUREM int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvurem" $4 $5) }
-  | LPAREN BVSDIV int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsdiv" $4 $5) }
-  | LPAREN BVSREM int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsrem" $4 $5) }
-  | LPAREN BVSMOD int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsmod" $4 $5) }
-  | LPAREN BVSHL int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvshl" $4 $5) }
-  | LPAREN BVLSHR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvlshr" $4 $5) }
-  | LPAREN BVASHR int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvashr" $4 $5) }
-  | LPAREN BVCONCAT int_or_hole int_or_hole int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "concat" $6 $7) }
-  | LPAREN BVNEG int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 "bvneg" $4) }
-  | LPAREN BVNOT int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 "bvnot" $4) }
-  | LPAREN BVLROTATE int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_left" $3) 
-                       $4) }
-  | LPAREN BVRROTATE int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "rotate_right" $3) 
-                       $4) }
-  | LPAREN BVCOMP int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvcomp" $4 $5) }
-  | LPAREN BVEXTRACT int_or_hole int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_4 "_" "extract" $4 $5)
-                       $7) }
-  | LPAREN BVZEROEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "zero_extend" $4)
-                       $6) }
-  | LPAREN BVSIGNEXT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "sign_extend" $4)
-                       $6) }
-  | LPAREN BVREPEAT int_or_hole int_or_hole int_or_hole sorted_term RPAREN
-    { (concat_sp_sep_2 (concat_sp_sep_3 "_" "repeat" $4)
-                       $6) }
+    { Bvbin ("#b"^$4) }
+  | LPAREN BVAND int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvand (s1, s2) }
+  | LPAREN BVOR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvor (s1, s2) }
+  | LPAREN BVXOR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvxor (s1, s2) }
+  | LPAREN BVNAND int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvnand (s1, s2) }
+  | LPAREN BVNOR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvnor (s1, s2) }
+  | LPAREN BVXNOR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvxnor (s1, s2) }
+  | LPAREN BVMUL int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvmul (s1, s2) }
+  | LPAREN BVADD int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvadd (s1, s2) }
+  | LPAREN BVSUB int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsub (s1, s2) }
+  | LPAREN BVUDIV int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvudiv (s1, s2) }
+  | LPAREN BVUREM int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvurem (s1, s2) }
+  | LPAREN BVSDIV int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsdiv (s1, s2) }
+  | LPAREN BVSREM int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsrem (s1, s2) }
+  | LPAREN BVSMOD int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsmod (s1, s2) }
+  | LPAREN BVSHL int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvshl (s1, s2) }
+  | LPAREN BVLSHR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvlshr (s1, s2) }
+  | LPAREN BVASHR int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvashr (s1, s2) }
+  | LPAREN BVCONCAT int_or_hole int_or_hole int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvconcat (s1, s2) }
+  | LPAREN BVNEG int_or_hole s=sorted_term RPAREN
+    { Bvneg s }
+  | LPAREN BVNOT int_or_hole s=sorted_term RPAREN
+    { Bvnot s }
+  | LPAREN BVLROTATE i=INT s=sorted_term RPAREN
+    { Bvlrotate (i, s) }
+  | LPAREN BVRROTATE i=INT s=sorted_term RPAREN
+    { Bvrrotate (i, s) }
+  | LPAREN BVCOMP int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvcomp (s1, s2) }
+  | LPAREN BVEXTRACT int_or_hole i=INT j=INT int_or_hole s=sorted_term RPAREN
+    { Bvextract (i, j, s) }
+  | LPAREN BVZEROEXT int_or_hole i=INT int_or_hole s=sorted_term RPAREN
+    { Bvzeroext (i, s) }
+  | LPAREN BVSIGNEXT int_or_hole i=INT int_or_hole s=sorted_term RPAREN
+    { Bvzeroext (i, s) }
+  | LPAREN BVREPEAT int_or_hole i=INT int_or_hole s=sorted_term RPAREN
+    { Bvrepeat (i, s) }
 ;
 
-sorted_term_without_apply:
-  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
-    { concat_sp_sep_4 "ite" $4 $5 $6 }
-  | T_TRUE { "true" }
-  | T_FALSE { "false" }
-  | LPAREN F_TO_B formula RPAREN
-    { $3 }
+apply_rec:
+  | LPAREN APPLY sort sort apply_rec s=sorted_term RPAREN
+    { s :: $5 }
   | LPAREN WRITE sort sort RPAREN 
-    { "store" }
+    { (SVar "store") :: [] }
   | LPAREN READ sort sort RPAREN 
-    { "select" }
-  | sorted_bv_term { $1 }  
-  | IDENT { ($1) }
-  | HOLE 
-    { ("IFUCKEDUP!-sorted_term->HOLE") }
+    { (SVar "select") :: [] }
+  | IDENT 
+    { (SVar $1) :: [] }
+;
+
+apply_init:
+  | LPAREN APPLY sort sort apply_rec s=sorted_term RPAREN
+    { let l = s :: $5 in 
+      let rev_l = List.rev l in
+      match List.hd rev_l with
+      | SVar "store" -> 
+        Store ((List.nth rev_l 1),(List.nth rev_l 2),(List.nth rev_l 3))
+      | SVar "select" -> 
+        Select ((List.nth rev_l 1),(List.nth rev_l 2))
+      | SVar v -> Appl (v, (List.tl rev_l))
+      | _ -> SError "apply_init" }
 ;
 
 sorted_term:
-  | LPAREN ITE sort formula sorted_term sorted_term RPAREN
-    { concat_sp_sep_4 "ite" $4 $5 $6 }
-  | T_TRUE { "true" }
-  | T_FALSE { "false" }
-  | LPAREN F_TO_B formula RPAREN
-    { $3 }
-  | apply_init { $1 }
+  | LPAREN ITE sort f=formula s1=sorted_term s2=sorted_term RPAREN
+    { SIte (f, s1, s2) }
+  | T_TRUE 
+    { STrue }
+  | T_FALSE 
+    { SFalse }
+  | LPAREN F_TO_B f=formula RPAREN
+    { form_to_sterm f }
+  | apply_init 
+    { $1 }
   | LPAREN WRITE sort sort RPAREN 
-    { "store" }
+    { SError "sorted_term -> write"}
   | LPAREN READ sort sort RPAREN 
-    { "select" }   
-  | IDENT { ($1) }
+    { SError "sorted_term -> read"}
+  | IDENT 
+    { SVar $1 }
   | sorted_bv_term { $1 }   
   | HOLE 
-    { ("IFUCKEDUP!-sorted_term->HOLE") }
+    { SError "sorted_term -> hole" }
 ;
 
 formula:
   | TRUE 
-    (*{ True }*)
-    { "true" }
+    { True }
   | FALSE 
-  (*{ False }*)
-    { "false" }
+    { False }
   | LPAREN NOT f=formula RPAREN 
-    (*{ Not f }*)
-    { (concat_sp_sep_2 "not" f) }
+    { Not f }
   | LPAREN AND f1=formula f2=formula RPAREN
-    (*{ And (f1,f2) }*)
-    { (concat_sp_sep_3 "and" f1 f2) }
+    { And (f1, f2) }
   | LPAREN OR f1=formula f2=formula RPAREN
-    (*{ Or (f1,f2) }*)
-    { (concat_sp_sep_3 "or" f1 f2) }
+    { Or (f1, f2) }
   | LPAREN IMPL f1=formula f2=formula RPAREN
-    (*{ Impl (f1,f2) }*)
-    { (concat_sp_sep_3 "=>" f1 f2) }
-  | LPAREN IFF f1=formula f2=formula RPAREN
-    (*{ Iff (f1,f2) }*)
-    { (concat_sp_sep_3 "=" f1 f2) }
+    { Impl (f1, f2) }
   | LPAREN XOR f1=formula f2=formula RPAREN
-    (*{ Xor (f1,f2) }*)
-    { (concat_sp_sep_3 "xor" f1 f2) }
-  | LPAREN IFTE formula formula formula RPAREN
-    { (concat_sp_sep_4 "ite" $3 $4 $5) }
-  | LPAREN EQUALS sort sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "=" $4 $5) }
-  | LPAREN P_APP sorted_term RPAREN { $3 }
-  | LPAREN BVULT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvult" $4 $5) }
-  | LPAREN BVULE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvule" $4 $5) }
-  | LPAREN BVUGT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvugt" $4 $5) }
-  | LPAREN BVUGE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvuge" $4 $5) }
-  | LPAREN BVSLT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvslt" $4 $5) }
-  | LPAREN BVSLE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsle" $4 $5) }
-  | LPAREN BVSGT int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsgt" $4 $5) }
-  | LPAREN BVSGE int_or_hole sorted_term sorted_term RPAREN
-    { (concat_sp_sep_3 "bvsge" $4 $5) }
-  | LPAREN BITOF sorted_term int_or_hole RPAREN { "" }
+    { Xor (f1, f2) }
+  | LPAREN EQUALS sort s1=sorted_term s2=sorted_term RPAREN
+    { Eq (s1, s2)}
+  | LPAREN IFF f1=formula f2=formula RPAREN
+    { Eq ((form_to_sterm f1), (form_to_sterm f2)) }
+  | LPAREN IFTE f1=formula f2=formula f3=formula RPAREN
+    { Ite (f1, f2, f3)}
+  | LPAREN P_APP s=sorted_term RPAREN 
+    { match s with 
+      | SVar v -> Var v
+      (*| TODO: here, handle the case where p_app could be applied to a function application that returns a Bool term *)
+      | _ -> Error "p_app case of formula" }
+  | LPAREN BVULT int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvult (s1, s2) }
+  | LPAREN BVULE int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvule (s1, s2) }
+  | LPAREN BVUGT int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvugt (s1, s2) }
+  | LPAREN BVUGE int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvuge (s1, s2) }
+  | LPAREN BVSLT int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvslt (s1, s2) }
+  | LPAREN BVSLE int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsle (s1, s2) }
+  | LPAREN BVSGT int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsgt (s1, s2) }
+  | LPAREN BVSGE int_or_hole s1=sorted_term s2=sorted_term RPAREN
+    { Bvsge (s1, s2) }
+  | LPAREN BITOF sorted_term int_or_hole RPAREN 
+    { Error "formula -> bitof" }
   | LET sort sorted_term LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!-formula->LET" }
+    { Error "formula -> let" }
   | FLET formula LPAREN LAMBDA IDENT formula RPAREN
-    { "IFUCKEDUP!-formula->FLET" }
-  | HOLE { "" }
+    { Error "formula -> flet" }
+  | HOLE 
+    { Error "formula -> hole" }
 ;
 
 holds_term:
   | LPAREN HOLDS clause RPAREN
-    (*{ (Error "holds_term -> HOLDS clause") }*)
-    { ("holds ("^$3^")") }
+    { (Error "holds_term -> holds clause") }
   | LPAREN CNF_HOLDS cnf RPAREN
-    (*{ (Error "holds_term -> CNF_HOLDS cnf") }*)
-    { ("cnf_holds ("^$3^")") }
+    { (Error "holds_term -> cnf_holds cnf") }
   | LPAREN TH_HOLDS formula RPAREN
     { ($3) }
-  | IDENT { $1 }
-    (*NOTSURE*)
+;
+
+holds_formula:
+  | LPAREN TH_HOLDS formula RPAREN
+    { ($3) }
+  | IDENT { Error "holds_formula -> ident" }
 ;
 
 typed_var:
   | IDENT VAR 
-    { "IFUCKEDUP!-typed_var->IDENT VAR" }
+    { "Parse error: typed_var->IDENT VAR" }
   | IDENT LPAREN TERM fixed_sort RPAREN
     { (concat_sp_sep_4 "declare-fun" $1 "()" $4) }
   | IDENT LPAREN TERM arrow_sort_init RPAREN 
     { (concat_sp_sep_3 "declare-fun" $1 $4) }
   | IDENT SORT 
     { (concat_sp_sep_3 "declare-sort" $1 "0") }
-  | IDENT holds_term 
-    (*{ (concat_sp_sep_2 "assert" (to_string_form $2)) }*)
-    { (concat_sp_sep_2 "assert" $2) }
+  | IDENT holds_formula 
+    { (concat_sp_sep_2 "assert" (to_string_form $2)) }
 ;
-
-/* My attempts to ignore the proof body:
-holds_anything_term:
-  | LPAREN ANYTHING RPAREN
-    { "" }
-;
-
-proof_anything_term:
-  | LPAREN ANYTHING RPAREN
-    { "" }
-;
-*/
 
 term:
   | LPAREN COLON holds_term proof_term RPAREN
