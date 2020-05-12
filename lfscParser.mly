@@ -15,30 +15,6 @@ let concat_sp_sep_5 a b c d e = "("^a^" "^b^" "^c^" "^d^" "^e^")"
 let concat_sp_sep_6 a b c d e f = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^")"
 let concat_sp_sep_7 a b c d e f g = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^")"
 let concat_sp_sep_8 a b c d e f g h = "("^a^" "^b^" "^c^" "^d^" "^e^" "^f^" "^g^" "^h^")"
-
-let rec form_to_sterm f = 
-match f with
-  | Var v -> SVar v
-  | True -> STrue
-  | False -> SFalse
-  | Not f -> SNot f
-  | And (f1,f2) -> SAnd (f1,f2)
-  | Or (f1,f2) -> SOr (f1,f2)
-  | Impl (f1,f2) -> SImpl (f1,f2)
-  | Xor (f1,f2) -> SXor (f1,f2)
-  | Eq (f1,f2) -> SEq (f1,f2)
-  | Ite (f1,f2,f3) -> let s2 = form_to_sterm f2 in
-                      let s3 = form_to_sterm f3 in
-                      SIte (f1,s2,s3)
-  | Bvult (s1,s2) -> SBvult (s1,s2)
-  | Bvule (s1,s2) -> SBvule (s1,s2)
-  | Bvugt (s1,s2) -> SBvugt (s1,s2)
-  | Bvuge (s1,s2) -> SBvuge (s1,s2)
-  | Bvslt (s1,s2) -> SBvslt (s1,s2)
-  | Bvsle (s1,s2) -> SBvsle (s1,s2)
-  | Bvsgt (s1,s2) -> SBvsgt (s1,s2)
-  | Bvsge (s1,s2) -> SBvsge (s1,s2)
-  | Error s -> SError s
 %}
 
 %token <string> IDENT
@@ -263,7 +239,7 @@ int_or_hole:
 sorted_bv_term:
   | LPAREN AVARBV INT IDENT RPAREN
     { let _ = (Hashtbl.add var_map $4 $3) in
-      SVar $4 }
+      Var $4 }
   | LPAREN ABV int_or_hole bvconst RPAREN
     { Bvbin ("#b"^$4) }
   | LPAREN BVAND int_or_hole s1=sorted_term s2=sorted_term RPAREN
@@ -326,11 +302,11 @@ apply_rec:
   | LPAREN APPLY sort sort apply_rec s=sorted_term RPAREN
     { s :: $5 }
   | LPAREN WRITE sort sort RPAREN 
-    { (SVar "store") :: [] }
+    { (Var "store") :: [] }
   | LPAREN READ sort sort RPAREN 
-    { (SVar "select") :: [] }
+    { (Var "select") :: [] }
   | IDENT 
-    { (SVar $1) :: [] }
+    { (Var $1) :: [] }
 ;
 
 apply_init:
@@ -338,34 +314,34 @@ apply_init:
     { let l = s :: $5 in 
       let rev_l = List.rev l in
       match List.hd rev_l with
-      | SVar "store" -> 
+      | Var "store" -> 
         Store ((List.nth rev_l 1),(List.nth rev_l 2),(List.nth rev_l 3))
-      | SVar "select" -> 
+      | Var "select" -> 
         Select ((List.nth rev_l 1),(List.nth rev_l 2))
-      | SVar v -> Appl (v, (List.tl rev_l))
-      | _ -> SError "apply_init" }
+      | Var v -> Appl (v, (List.tl rev_l))
+      | _ -> Error "apply_init" }
 ;
 
 sorted_term:
   | LPAREN ITE sort f=formula s1=sorted_term s2=sorted_term RPAREN
-    { SIte (f, s1, s2) }
+    { Ite (f, s1, s2) }
   | T_TRUE 
-    { STrue }
+    { True }
   | T_FALSE 
-    { SFalse }
-  | LPAREN F_TO_B f=formula RPAREN
-    { form_to_sterm f }
+    { False }
+  | LPAREN F_TO_B formula RPAREN
+    { $3 }
   | apply_init 
     { $1 }
   | LPAREN WRITE sort sort RPAREN 
-    { SError "sorted_term -> write"}
+    { Error "sorted_term -> write"}
   | LPAREN READ sort sort RPAREN 
-    { SError "sorted_term -> read"}
+    { Error "sorted_term -> read"}
   | IDENT 
-    { SVar $1 }
+    { Var $1 }
   | sorted_bv_term { $1 }   
   | HOLE 
-    { SError "sorted_term -> hole" }
+    { Error "sorted_term -> hole" }
 ;
 
 formula:
@@ -386,14 +362,11 @@ formula:
   | LPAREN EQUALS sort s1=sorted_term s2=sorted_term RPAREN
     { Eq (s1, s2)}
   | LPAREN IFF f1=formula f2=formula RPAREN
-    { Eq ((form_to_sterm f1), (form_to_sterm f2)) }
+    { Eq (f1, f2) }
   | LPAREN IFTE f1=formula f2=formula f3=formula RPAREN
     { Ite (f1, f2, f3)}
-  | LPAREN P_APP s=sorted_term RPAREN 
-    { match s with 
-      | SVar v -> Var v
-      (*| TODO: here, handle the case where p_app could be applied to a function application that returns a Bool term *)
-      | _ -> Error "p_app case of formula" }
+  | LPAREN P_APP sorted_term RPAREN 
+    { $3 }
   | LPAREN BVULT int_or_hole s1=sorted_term s2=sorted_term RPAREN
     { Bvult (s1, s2) }
   | LPAREN BVULE int_or_hole s1=sorted_term s2=sorted_term RPAREN
@@ -445,7 +418,7 @@ typed_var:
   | IDENT SORT 
     { (concat_sp_sep_3 "declare-sort" $1 "0") }
   | IDENT holds_formula 
-    { (concat_sp_sep_2 "assert" (to_string_form $2)) }
+    { (concat_sp_sep_2 "assert" (to_string_sorted_term $2)) }
 ;
 
 term:
