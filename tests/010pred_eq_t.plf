@@ -1,5 +1,0 @@
-(check 
-    (% p (term Bool)
-    (% ph (th_holds (p_app p))
-        (: (th_holds (= _ p t_true))
-                (pred_eq_t _ ph)))))

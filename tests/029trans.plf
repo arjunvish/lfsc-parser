@@ -1,9 +1,0 @@
-(check 
-(% A sort
-(% p (term A)
-(% q (term A)
-(% r (term A)
-(% pf1 (th_holds (= _ p q))
-(% pf2 (th_holds (= _ q r))
-  (: (th_holds (= _ p r))
-       (trans _ _ _ _ pf1 pf2)))))))))
